@@ -79,6 +79,60 @@ class SBKReader:
 
         return self.parseResponse(self.b.response().read())
 
+    def lastPage(self):
+        self.b.select_form(name=cfg['form_name'])
+        self.b.form.set_all_readonly(False)
+
+        self.b.form.new_control("hidden", "__EVENTTARGET", { "value": "ctl00$FullContentRegion$ContentRegion$SecondaryContentRegion$CaseList$CaseGrid", "id": "__EVENTTARGET" })
+        self.b.form.new_control("hidden", "__EVENTARGUMENT", { "value": "Page$Last", "id": "__EVENTARGUMENT" })
+
+        request = self.b.form.click()
+        self.b.open(request)
+
+        assert self.b.viewing_html()
+        self.logger.info("Got page with title %s" % self.b.title())
+
+        return self.parseResponse(self.b.response().read())
+
+
+    def getUpdates(self, address_query_value, lastResult=None):
+        """Get all results after lastResult (identified by Diarienummer, ie case ID). This traverses arbitrarily many pages to find the last result."""
+        cases = self.search(address_query_value)
+
+        resultCases = []
+
+        # set to save ids of previous page, to detect whether we reached the last page
+        # (when visiting the next page of the last page, we get the same results)
+        previousCases = set()
+
+        reachedEnd = False
+
+        while reachedEnd is False:
+            # if we reached the final page, return
+
+            newCases = set()
+            for case in cases:
+                newCases.add(case['id'])
+
+            if newCases == previousCases:
+                # previous page was the last one, return
+                return resultCase
+
+            # otherwise, read cases and go to next page
+
+            # read cases into result
+            for case in cases:
+                if case['id'] == lastResult:
+                    # if we reached the last known result, stop looking
+                    return resultCases
+                else:
+                    resultCases.append(case)
+
+            # proceed to next page
+            cases = self.nextPage()
+
+        return resultCases
+
 
     def parseResponse(self, responseHTML):
         """Parse the html for a result table and return
@@ -89,7 +143,7 @@ class SBKReader:
         # TODO more specific criteria?
         all_rows = s.find_all('tr')
 
-        cases = {}
+        cases = []
         for row in all_rows:
             cells = row.find_all('td')
             # use only rows with 5 columns and a specific class to distinguish them from other table elements
@@ -97,23 +151,21 @@ class SBKReader:
                 case_id = cells[0].find_all('a')[0].string
                 print "Found case with ID: %s" % case_id
                 case = {}
+                case['id']          = case_id
                 case['fastighet']   = cells[1].string.strip()
                 case['type']        = cells[2].string.strip()
                 case['description'] = cells[3].string.strip()
                 case['date']        = cells[4].string.strip()
-                cases[case_id] = case
+                cases.append(case)
 
         return cases
 
 
 def main():
     reader = SBKReader()
-    cases = reader.search("Brunnsgatan 1")
 
-    print "Found %s results:" % len(cases)
-    print json.dumps(cases, indent=2)
-
-    cases = reader.nextPage()
+    # get all results for Brunnsgatan 1, newer than 2008-09660
+    cases = reader.getUpdates("Brunnsgatan 1", "2008-09960")
 
     print "Found %s results:" % len(cases)
     print json.dumps(cases, indent=2)
