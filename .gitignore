@@ -102,3 +102,4 @@ ENV/
 
 # vim backup files
 *~
+*.swp
