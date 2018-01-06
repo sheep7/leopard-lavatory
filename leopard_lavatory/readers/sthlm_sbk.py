@@ -1,18 +1,13 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 
-import sys
-import time
-import random
 import logging
-import mechanicalsoup
+from leopard_lavatory.readers.base_reader import BaseReader
 
 
-class SBKReader:
+class SBKReader(BaseReader):
 
     url = 'http://insynsbk.stockholm.se/Byggochplantjansten/Arenden/'
-    user_agent_string = 'Mozilla/5.0 (Windows; U; Windows NT 6.0; en-US; rv:1.9.0.6'
-    delay_seconds_avg = 5
     form_name = '#aspnetForm'
     field_name_prefix = 'ctl00$FullContentRegion$ContentRegion$SecondaryContentRegion$'
     event_target_field_name = 'CaseList$CaseGrid'
@@ -20,16 +15,7 @@ class SBKReader:
     fastighetsbeteckning_field_name = 'SearchPropertyAndCase$SearchProperty$PropertyIdInput'
 
     def __init__(self, log_level=logging.INFO):
-
-        browser = mechanicalsoup.StatefulBrowser()
-        browser.set_user_agent(self.user_agent_string)
-        browser.set_debug(log_level == logging.DEBUG)
-        self.browser = browser
-
-        logger = logging.getLogger(__name__)
-        logger.addHandler(logging.StreamHandler(sys.stdout))
-        logger.setLevel(log_level)
-        self.logger = logger
+        super().__init__(log_level)
 
     def parse_page(self, page):
         """Parse the page for a result table and return the table content in json friendly format.
@@ -96,6 +82,7 @@ class SBKReader:
     def get_cases(self, address_query_value, newer_than_case=None):
         """Get all results after lastResult (identified by diarienummer, ie case ID). This traverses arbitrarily many
         pages to find the last result. """
+
         cases = self.get_first_page(address_query_value)
         self.logger.debug('[1] found {} cases'.format(len(cases)))
 
@@ -120,10 +107,7 @@ class SBKReader:
                 else:
                     result_cases.append(case)
 
-            # wait random number of seconds to avoid rate-limiting
-            seconds = random.uniform(1, int(self.delay_seconds_avg)*2)
-            self.logger.debug('Waiting {:.2} seconds to avoid rate limiting.'.format(seconds))
-            time.sleep(seconds)
+            self.random_sleep()
 
             # proceed to next page
             cases = self.get_next_page()

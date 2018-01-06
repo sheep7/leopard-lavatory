@@ -1,1 +1,1 @@
-__all__ = ['sthlm_sbk']
+__all__ = ['sthlm_sbk', 'base_reader']
