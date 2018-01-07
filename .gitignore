@@ -106,3 +106,6 @@ ENV/
 
 # distutils
 MANIFEST
+
+# intellij folder
+.idea/

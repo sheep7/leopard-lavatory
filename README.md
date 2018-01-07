@@ -1,5 +1,5 @@
 # leopard-lavatory
-fetch public information from Swedish authorities and make them available as alerts for citizens
+fetch public information from Swedish authorities and make them available as alerts
 
 ---
 
