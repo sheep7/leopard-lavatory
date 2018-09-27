@@ -12,4 +12,4 @@ RUN pip install ${appname}*
 
 CMD ["python", \
      "-m", \
-     "leopard_lavatory.test"]
+     "leopard_lavatory.run"]

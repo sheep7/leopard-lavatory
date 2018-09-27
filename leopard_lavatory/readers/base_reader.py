@@ -2,7 +2,9 @@
 # -*- coding: utf-8 -*-
 
 """
-This file holds a minimal working example.
+Class BaseReader
+
+Provides a mechanical soup browser and a sleep random time function.
 """
 
 import sys

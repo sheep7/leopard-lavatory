@@ -109,3 +109,6 @@ MANIFEST
 
 # intellij folder
 .idea/
+
+# sqlite database file
+*.sqlitedb
