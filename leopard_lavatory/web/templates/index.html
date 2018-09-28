@@ -1,0 +1,62 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Bevaka Byggärende - Leopard Lavatory</title>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+</head>
+<body>
+
+{% for message in get_flashed_messages() %}
+<!-- Note -->
+<div class="note">
+    <h4>{{ message }}</h4>
+</div>
+{% endfor %}
+
+<!-- Header -->
+<div class="header">
+    <h1>Bevaka byggärende</h1>
+    <p>Få ett mejl när din fastighetsägare planerar en renovering.</p>
+</div>
+
+<!-- Navigation Bar -->
+<div class="navbar">
+    <a href="#">Skapa bevakning</a>
+    <a href="#">Hjälp+Info</a>
+</div>
+
+<!-- The flexible grid (content) -->
+<div class="row">
+    <div class="main">
+        <h2>Skapa bevakning</h2>
+        <form class="create_form" method="post">
+            <input type="hidden" name="action" value="create">
+            <label for="addressinput">adress:</label>
+            <input type="text" id="addressinput" name="address" onchange="refreshMap()"
+                   placeholder="gatuadress eller fastighet" required>
+            <label for="emailinput">mejl:</label>
+            <input type="email" id="emailinput" name="email" placeholder="mejladress" required>
+            <input type="submit" value="Skapa bevakning" title="skapa bevakning">
+        </form>
+    </div>
+    <div class="side">
+         <iframe class="mapframe" id="mapframe" src="https://kartor.stockholm.se"></iframe>
+    </div>
+    <script>
+        function refreshMap() {
+            var mf = document.getElementById("mapframe");
+            var address = document.getElementById("addressinput").value;
+            mf.src = "http://kartor.stockholm.se/bios/dpwebmap/cust_sth/sbk/sthlm_sse/DPWebMap.html?zoom=7&layers=TTTB000000000T&super_search=" + address;
+        }
+    </script>
+</div>
+
+<!-- Footer -->
+<div class="footer">
+    <a href="#">Integritetspolicy</a>
+</div>
+
+</body>
+</html>
