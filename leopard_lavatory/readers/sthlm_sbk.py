@@ -21,6 +21,8 @@ class SBKReader(BaseReader):
     event_target_field_name = 'CaseList$CaseGrid'
     address_field_name = 'SearchPropertyAndCase$SearchProperty$AddressInput'
     fastighetsbeteckning_field_name = 'SearchPropertyAndCase$SearchProperty$PropertyIdInput'
+    search_button_name = 'SearchPropertyAndCase$SearchButton'
+    search_button_value = 'Sök'
 
     def parse_page(self, page):
         """Parse the page for a result table and return the table content in json friendly format.
@@ -59,6 +61,10 @@ class SBKReader(BaseReader):
         # fill form
         self.browser.select_form(self.form_name)
         self.browser[self.field_name_prefix + self.address_field_name] = address_query_value
+
+        # get form to add the search_button key value pair (stupid ASP.NET)
+        form = self.browser.get_current_form()
+        form.new_control("input", self.field_name_prefix + self.search_button_name, self.search_button_value)
 
         # send search request
         self.logger.debug('Requesting first page of search results for address %s',
