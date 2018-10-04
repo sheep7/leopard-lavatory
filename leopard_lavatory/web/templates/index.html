@@ -48,7 +48,9 @@
         function refreshMap() {
             var mf = document.getElementById("mapframe");
             var address = document.getElementById("addressinput").value;
-            mf.src = "http://kartor.stockholm.se/bios/dpwebmap/cust_sth/sbk/sthlm_sse/DPWebMap.html?zoom=7&layers=TTTB000000000T&super_search=" + address;
+            mf.src = "https://kartor.stockholm.se"
+                   + "/bios/dpwebmap/cust_sth/sbk/sthlm_sse/DPWebMap.html?"
+                   + "zoom=7&layers=TTTB000000000T&super_search=" + address;
         }
     </script>
 </div>

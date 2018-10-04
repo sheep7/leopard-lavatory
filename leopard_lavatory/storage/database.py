@@ -41,8 +41,8 @@ class Base(object):
 
     def __repr__(self):
         """Make a pretty string representation of the object for debugging and logging."""
-        fields = ', '.join(f"{k}={v}" for k, v in self.__dict__.items() if not k.startswith('__'))
-        return f"<{cls.__name__} ({fields})>"
+        fields = ', '.join(f"{k}={v}" for k, v in self.__dict__.items() if not k.startswith('_'))
+        return f"<{self.__class__.__name__} ({fields})>"
 
 
 # mix the custom Base table class above with the sqlalchemy declarative base
