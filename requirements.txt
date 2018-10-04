@@ -2,3 +2,4 @@ flask
 mechanicalsoup
 pytest
 pytest-cov
+sqlalchemy
