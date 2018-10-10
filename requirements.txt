@@ -3,3 +3,5 @@ mechanicalsoup
 pytest
 pytest-cov
 sqlalchemy
+celery
+flower
