@@ -93,7 +93,6 @@ def add_user_watchjob(user_email, watchjob_query):
         user_email (str): Email address of the new user.
         watchjob_query (json): json object representing the search query of the watchjob.
     """
-    s = Session()
     new_user = User(email=user_email)
     new_watchjob = Watchjob(query=json.dumps(watchjob_query))
     new_user.watchjobs.append(new_watchjob)
@@ -101,6 +100,18 @@ def add_user_watchjob(user_email, watchjob_query):
     SESSION.add(new_watchjob)
     SESSION.commit()
     return new_user, new_watchjob
+
+
+def add_request(user_email, watchjob_query):
+    """Adds a new request to the database.
+
+    Args:
+        user_email (str): email address of the user
+        watchjob_query (dict): the search query as json object
+    """
+    new_request = UserRequest(email=user_email, query=json.dumps(watchjob_query))
+    SESSION.add(new_request)
+    SESSION.commit()
 
 
 def relate_user_watchjob(user, watchjob):
@@ -115,6 +126,9 @@ def relate_user_watchjob(user, watchjob):
 
 def get_all_watchjobs():
     return SESSION.query(Watchjob).all()
+
+def get_all_requests():
+    return SESSION.query(UserRequest).all()
 
 def delete_user(user):
     SESSION.delete(user)
