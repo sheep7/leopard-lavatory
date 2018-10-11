@@ -35,3 +35,9 @@ If you like, you can put the variable declarations in your virtualenv's `bin/act
 ## Running celery
 
 --TODO--
+
+`celery worker -A leopard_lavatory.web.tasks`
+
+`celery -A leopard_lavatory.web.tasks beat`
+
+`flower --broker=redis://localhost:6379`
