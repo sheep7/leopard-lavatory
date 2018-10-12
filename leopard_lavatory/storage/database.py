@@ -3,26 +3,16 @@ Database class, general interface for storing different objects.
 """
 import json
 from datetime import datetime
-from secrets import token_urlsafe
 
 from sqlalchemy import DateTime, Integer, String
 from sqlalchemy import create_engine, Column, ForeignKey, Table
 from sqlalchemy.ext.declarative import declarative_base, declared_attr
 from sqlalchemy.orm import sessionmaker, relationship
 
+from leopard_lavatory.utils import create_token
+
 DB_URI = 'sqlite:///leopardlavatory.sqlite'
-TOKEN_BYTES = 42
-LOG_ALL_SQL_STATEMENTS=False
-
-
-def create_token():
-    """Create a new url safe, high-entropy string that can be used as access token for for
-    example confirm, delete or modify operations.
-
-    Returns:
-        str: url safe, cryptographically secure token
-    """
-    return token_urlsafe(nbytes=TOKEN_BYTES)
+LOG_ALL_SQL_STATEMENTS = False
 
 
 class Base(object):
@@ -124,11 +114,14 @@ def relate_user_watchjob(user, watchjob):
     user.watchjobs.append(watchjob)
     SESSION.commit()
 
+
 def get_all_watchjobs():
     return SESSION.query(Watchjob).all()
 
+
 def get_all_requests():
     return SESSION.query(UserRequest).all()
+
 
 def delete_user(user):
     SESSION.delete(user)
