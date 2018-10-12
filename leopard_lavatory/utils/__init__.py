@@ -69,10 +69,10 @@ def log_safe(string):
     Args:
         string (str): the untrusted input string
     Returns:
-        str: a
+        str: a string with only letters, digits, and %_.-@
     """
-    if len(string) > 1000:
-        string = string[:1000] + '...'
+    if len(string) > 300:
+        string = string[:300] + '...'
 
     safe_string = quote(string, safe='@')
 

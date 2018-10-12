@@ -34,7 +34,7 @@ class TestUtils:
         assert not valid_address("illegal character '")
 
     def test_log_safe(self):
-        assert len(log_safe('a'*2000)) <= 1003, 'long inputs must be cut short'
-        assert log_safe('a'*2000).endswith('...'), 'cut inputs must end in ...'
+        assert len(log_safe('a'*400)) <= 303, 'long inputs must be cut short'
+        assert log_safe('a'*400).endswith('...'), 'cut inputs must end in ...'
         assert "'" not in log_safe("'"), 'unsafe characters like single quotes must be removed'
         assert log_safe('test@te.st') == 'test@te.st', 'simple email addresses must be preserved'
