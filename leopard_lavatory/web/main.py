@@ -42,7 +42,10 @@ def handle_new_request(email, address):
 
 @bp.route('/', methods=('GET', 'POST'))
 def index():
-    """Render the landing page and handle posted requests."""
+    """Render the landing page and handle posted requests.
+    Returns:
+        Union[str, werkzeug.wrappers.Response]: a rendered template or a werkzeug Response object
+    """
     if request.method == 'POST':
         handle_new_request(email=request.form['email'],
                            address=request.form['address'])

@@ -117,23 +117,34 @@ def relate_user_watchjob(user, watchjob):
 
 
 def get_all_watchjobs():
-    """
-
+    """Return all watchjob entries from database.
     Returns:
-
+        List[Watchjob]: list of all watchjobs
     """
     return SESSION.query(Watchjob).all()
 
 
 def get_all_requests():
+    """Return all user request entries from the database.
+    Returns:
+        List[UserRequest]: list of all user requests
+    """
     return SESSION.query(UserRequest).all()
 
 
 def delete_user(user):
+    """Delete the given user from the database.
+    Args:
+        user (User): the user to delete
+    """
     SESSION.delete(user)
     SESSION.commit()
 
 
 def delete_watchjob(watchjob):
+    """Delete the given watchjob from the database.
+    Args:
+        watchjob (Watchjob): the watchjob to delete
+    """
     SESSION.delete(watchjob)
     SESSION.commit()
