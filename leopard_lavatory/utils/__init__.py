@@ -59,20 +59,21 @@ def valid_address(address):
     return regex.match(address) is not None
 
 
-def log_safe(string):
+def log_safe(string, max_len=300):
     """Turns any string into a quoted string (%xx escaping) to safely write it to log output.
 
     All characters get %xx quoted except for letters, digits, and these: _.-@
-    Also the input will be cut off if longer than 1000 characters. Note that the return value
-    can be a string longer than 1000 characters because of the escaping (and the three dots
+    Also the input will be cut off if longer than `max_len` characters. Note that the return value
+    can be a string longer than `max_len` characters because of the escaping (and the three dots
     for cut strings).
     Args:
         string (str): the untrusted input string
+        max_len (int): maximum allowed length of the input (longer will be cut)
     Returns:
         str: a string with only letters, digits, and %_.-@
     """
-    if len(string) > 300:
-        string = string[:300] + '...'
+    if len(string) > max_len:
+        string = string[:max_len] + '...'
 
     safe_string = quote(string, safe='@')
 
