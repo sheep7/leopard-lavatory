@@ -31,7 +31,7 @@ inspired by the frustrating similarity of reality with _The Hitchhikers Guide to
 
 ## Running in development
 
-Install all requirements (preferably in a `virtualenv`:
+Install all requirements (preferably in a `virtualenv`):
 
 ```
 $ pip install -r requirements.txt
@@ -46,8 +46,6 @@ $ FLASK_APP=leopard_lavatory/web FLASK_SECRET_KEY=somesecretkey flask run
 If you like, you can put the variable declarations in your virtualenv's `bin/activate` script and simply run `flask run`.
 
 ## Running celery
-
---TODO--
 
 `celery worker -A leopard_lavatory.web.tasks`
 
