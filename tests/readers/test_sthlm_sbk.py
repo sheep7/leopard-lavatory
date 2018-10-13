@@ -16,6 +16,3 @@ def test_sthlm_sbk():
     print(json.dumps(test_cases, indent=2, ensure_ascii=False))
 
     assert len(test_cases) > 23
-
-
-
