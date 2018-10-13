@@ -1,7 +1,8 @@
+"""Test storage package."""
 import json
 
-from leopard_lavatory.storage.database import add_user_watchjob, relate_user_watchjob, delete_user, \
-    delete_watchjob, get_all_watchjobs
+from leopard_lavatory.storage.database import add_user_watchjob, relate_user_watchjob, \
+    delete_user, delete_watchjob, get_all_watchjobs
 
 
 class TestDatabase:

@@ -11,10 +11,8 @@ from leopard_lavatory.readers.base_reader import BaseReader
 
 
 class SBKReader(BaseReader):
+    """Reader for the website of the Stockholm stadsbyggnadskontor (insynsbk.stockholm.se)."""
 
-    """
-    Reading from Stockholms Stadsbyggnadskontor website.
-    """
     url = 'http://insynsbk.stockholm.se/Byggochplantjansten/Arenden/'
     form_name = '#aspnetForm'
     field_name_prefix = 'ctl00$FullContentRegion$ContentRegion$SecondaryContentRegion$'
@@ -26,8 +24,10 @@ class SBKReader(BaseReader):
 
     def parse_page(self, page):
         """Parse the page for a result table and return the table content in json friendly format.
-
-        :param page: BeautifulSoup object representation of the page
+        Args:
+            page (bs4.BeautifulSoup): BeautifulSoup object representation of the page
+        Returns:
+            list[dict]: a list of the cases, each case is represented as a dict
         """
         all_rows = page.find_all('tr')
 
@@ -38,25 +38,30 @@ class SBKReader(BaseReader):
             #  elements
             if len(cells) == 5 and cells[0].get('class') == ['DataGridItemCell']:
                 case_id = cells[0].find_all('a')[0].string
-                self.logger.debug('Found case with ID: %s', case_id)
-                case = {'id':          case_id,
-                        'fastighet':   cells[1].string.strip(),
-                        'type':        cells[2].string.strip(),
+                self.log.debug('Found case with ID: %s', case_id)
+                case = {'id': case_id,
+                        'fastighet': cells[1].string.strip(),
+                        'type': cells[2].string.strip(),
                         'description': cells[3].string.strip(),
-                        'date':        cells[4].string.strip()}
+                        'date': cells[4].string.strip()}
                 cases.append(case)
 
         return cases
 
     def get_first_page(self, address_query_value):
         """Requests the search page and issues a query with the given values. Returns the cases
-        found on the first page of results."""
+        found on the first page of results.
+        Args:
+            address_query_value (str): the address query string
+        Returns:
+            list[dict]: a list of the cases, each case is represented as a dict
+        """
 
         # requesting page with search form
-        self.logger.debug('Requesting %s', self.url)
+        self.log.debug('Requesting %s', self.url)
         self.browser.open(self.url)
         current_page = self.browser.get_current_page()
-        self.logger.debug('Got page with title "%s"', current_page.title.text.strip())
+        self.log.debug('Got page with title "%s"', current_page.title.text.strip())
 
         # fill form
         self.browser.select_form(self.form_name)
@@ -64,20 +69,24 @@ class SBKReader(BaseReader):
 
         # get form to add the search_button key value pair (stupid ASP.NET)
         form = self.browser.get_current_form()
-        form.new_control("input", self.field_name_prefix + self.search_button_name, self.search_button_value)
+        form.new_control('input', self.field_name_prefix + self.search_button_name,
+                         self.search_button_value)
 
         # send search request
-        self.logger.debug('Requesting first page of search results for address %s',
-                          address_query_value)
+        self.log.debug('Requesting first page of search results for address %s',
+                       address_query_value)
         self.browser.submit_selected()
 
         current_page = self.browser.get_current_page()
-        self.logger.debug('Got page with title "%s"', current_page.title.text.strip())
+        self.log.debug('Got page with title "%s"', current_page.title.text.strip())
 
         return self.parse_page(current_page)
 
     def get_next_page(self):
-        """Request the next result page and return cases found on that."""
+        """Request the next result page and return cases found on that.
+        Returns:
+            list[dict]: a list of the cases, each case is represented as a dict
+        """
 
         self.browser.select_form(self.form_name)
 
@@ -85,20 +94,27 @@ class SBKReader(BaseReader):
                                  self.event_target_field_name)
         self.browser.new_control('hidden', '__EVENTARGUMENT', 'Page$Next')
 
-        self.logger.info('Requesting next page of search results')
+        self.log.info('Requesting next page of search results')
         self.browser.submit_selected()
 
         current_page = self.browser.get_current_page()
-        self.logger.debug('Got page with title "%s"', current_page.title.text.strip())
+        self.log.debug('Got page with title "%s"', current_page.title.text.strip())
 
         return self.parse_page(current_page)
 
     def get_cases(self, address_query_value, newer_than_case=None):
-        """Get all results after lastResult (identified by diarienummer, ie case ID). This traverses
-         arbitrarily many pages to find the last result. """
+        """Get all cases newer than the case id provided in `newer_than_case`
+        (diarienummer). This traverses arbitrarily many pages until the `newer_than_case` is
+        found or all cases have been listed.
+        Args:
+            address_query_value (str): address query string
+            newer_than_case (str): case id where to stop the backward search
+        Returns:
+            list[dict]: a list of the cases, each case is represented as a dict
+        """
 
         cases = self.get_first_page(address_query_value)
-        self.logger.debug('[1] found %s cases', len(cases))
+        self.log.debug('[1] found %s cases', len(cases))
 
         result_cases = []
 
@@ -125,7 +141,7 @@ class SBKReader(BaseReader):
 
             # proceed to next page
             cases = self.get_next_page()
-            self.logger.debug('found %s cases', len(cases))
+            self.log.debug('found %s cases', len(cases))
 
             # update state
             previous_case_ids = new_case_ids

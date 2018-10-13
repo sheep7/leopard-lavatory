@@ -111,4 +111,5 @@ MANIFEST
 .idea/
 
 # sqlite database file
+*.sqlite
 *.sqlitedb

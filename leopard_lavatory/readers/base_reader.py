@@ -7,10 +7,10 @@ Class BaseReader
 Provides a mechanical soup browser and a sleep random time function.
 """
 
-import sys
-import time
-import random
 import logging
+import random
+import time
+
 import mechanicalsoup
 
 
@@ -22,27 +22,28 @@ class BaseReader:
     Random sleep function for rate limiting.
     """
 
-    def __init__(self, log_level=logging.INFO, avg_delay_seconds=5,
+    def __init__(self, avg_delay_seconds=5,
                  user_agent_string='Mozilla/5.0 (Windows; U; Windows NT 6.0; en-US; rv:1.9.0.6'):
         self.avg_delay_seconds = avg_delay_seconds
 
+        logger = logging.getLogger(self.__class__.__name__)
+        self.log = logger
+
         browser = mechanicalsoup.StatefulBrowser()
         browser.set_user_agent(user_agent_string)
-        browser.set_debug(log_level == logging.DEBUG)
+        browser.set_debug(self.log.level == logging.DEBUG)
         self.browser = browser
-
-        logger = logging.getLogger(self.__class__.__name__)
-        logger.addHandler(logging.StreamHandler(sys.stdout))
-        logger.setLevel(log_level)
-        self.logger = logger
 
     def random_sleep(self):
         """Wait random number of seconds to avoid rate-limiting"""
 
         seconds = random.uniform(1, int(self.avg_delay_seconds) * 2)
-        self.logger.debug('Waiting {:.2} seconds to avoid rate limiting.'.format(seconds))
+        self.log.debug('Waiting {:.2} seconds to avoid rate limiting.'.format(seconds))
         time.sleep(seconds)
 
     def set_avg_delay_seconds(self, avg_delay_seconds):
-        """Set the average number of seconds to sleep when calling random_sleep()."""
+        """Set the average number of seconds to sleep when calling random_sleep().
+        Args:
+            avg_delay_seconds (int): the average delay in seconds
+        """
         self.avg_delay_seconds = avg_delay_seconds
