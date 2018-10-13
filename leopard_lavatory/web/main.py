@@ -6,8 +6,7 @@ from flask import Blueprint, flash, render_template, request, url_for
 from werkzeug.utils import redirect
 
 from leopard_lavatory.storage.database import add_request, get_all_requests
-from leopard_lavatory.utils import valid_email, valid_address
-from utils import log_safe
+from leopard_lavatory.utils import valid_email, valid_address, log_safe
 
 LOG = logging.getLogger(__name__)
 
