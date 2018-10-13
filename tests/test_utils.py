@@ -15,8 +15,8 @@ class TestUtils:
         assert valid_email('test@example.com')
         assert valid_email('test.Uppercase@and.Subdomain.example.com')
         assert valid_email('test+plus@example.com')
-        assert valid_email('a'*240 + '@maxlength.com'), 'a 254 character email is valid'
-        assert not valid_email('a'*243 + '@toolong.com'), 'a 255 character email is not valid'
+        assert valid_email('a' * 240 + '@maxlength.com'), 'a 254 character email is valid'
+        assert not valid_email('a' * 243 + '@toolong.com'), 'a 255 character email is not valid'
         assert not valid_email(''), 'the empty string is not a valid email'
         assert not valid_email('noatsign%example.com'), 'a string without @ is not a valid email'
         assert not valid_email('white space@in.address.com')
@@ -27,14 +27,14 @@ class TestUtils:
     def test_valid_address(self):
         assert valid_address('Drottninggatan 30')
         assert valid_address('Värmdövägen 1b')
-        assert valid_address('a'*255), 'a 255 character string is valid'
-        assert not valid_address('a'*256), 'a 256 character string is too long'
+        assert valid_address('a' * 255), 'a 255 character string is valid'
+        assert not valid_address('a' * 256), 'a 256 character string is too long'
         assert not valid_address('illegal character !')
         assert not valid_address('illegal character "')
         assert not valid_address("illegal character '")
 
     def test_log_safe(self):
-        assert len(log_safe('a'*400)) <= 303, 'long inputs must be cut short'
-        assert log_safe('a'*400).endswith('...'), 'cut inputs must end in ...'
+        assert len(log_safe('a' * 400)) <= 303, 'long inputs must be cut short'
+        assert log_safe('a' * 400).endswith('...'), 'cut inputs must end in ...'
         assert "'" not in log_safe("'"), 'unsafe characters like single quotes must be removed'
         assert log_safe('test@te.st') == 'test@te.st', 'simple email addresses must be preserved'
