@@ -1,11 +1,13 @@
 """Testing the web package."""
 
 import pytest
+
 from leopard_lavatory import web
 
 
 @pytest.fixture
 def client():
+    """Create testing client for other tests."""
     app = web.create_app()
     app.config['TESTING'] = True
     app.secret_key = 'testing'
@@ -25,6 +27,7 @@ def test_index_post(client):
     ), follow_redirects=True)
     assert b'fel' not in rv.data
     assert b'Aktivera' in rv.data
+
 
 def test_index_post_invalid_input(client):
     rv = client.post('/', data=dict(

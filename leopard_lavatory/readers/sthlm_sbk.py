@@ -64,7 +64,8 @@ class SBKReader(BaseReader):
 
         # get form to add the search_button key value pair (stupid ASP.NET)
         form = self.browser.get_current_form()
-        form.new_control("input", self.field_name_prefix + self.search_button_name, self.search_button_value)
+        form.new_control('input', self.field_name_prefix + self.search_button_name,
+                         self.search_button_value)
 
         # send search request
         self.logger.debug('Requesting first page of search results for address %s',

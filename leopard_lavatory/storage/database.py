@@ -21,6 +21,7 @@ class Base(object):
     It uses the class name as table name and defines three default columns added to all tables:
     id, created_at and modified at."""
 
+    # noinspection PyMethodParameters
     @declared_attr
     def __tablename__(cls):
         return cls.__name__.lower()
@@ -81,7 +82,7 @@ def add_user_watchjob(user_email, watchjob_query):
 
     Args:
         user_email (str): Email address of the new user.
-        watchjob_query (json): json object representing the search query of the watchjob.
+        watchjob_query (dict): json object representing the search query of the watchjob.
     """
     new_user = User(email=user_email)
     new_watchjob = Watchjob(query=json.dumps(watchjob_query))
@@ -116,6 +117,11 @@ def relate_user_watchjob(user, watchjob):
 
 
 def get_all_watchjobs():
+    """
+
+    Returns:
+
+    """
     return SESSION.query(Watchjob).all()
 
 

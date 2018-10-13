@@ -3,3 +3,4 @@ mechanicalsoup
 pytest
 pytest-cov
 sqlalchemy
+werkzeug
