@@ -1,4 +1,7 @@
 [![Build Status](https://travis-ci.com/sheep7/leopard-lavatory.svg?branch=master)](https://travis-ci.com/sheep7/leopard-lavatory)
+[![codecov](https://codecov.io/gh/sheep7/leopard-lavatory/branch/master/graph/badge.svg)](https://codecov.io/gh/sheep7/leopard-lavatory)
+
+
 
 # leopard-lavatory
 fetch public information from Swedish authorities and make them available as alerts

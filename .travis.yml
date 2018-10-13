@@ -1,4 +1,17 @@
+sudo: false
+
 language: python
+
 python:
-    - "3.6"
-script: PYTHONPATH=. pytest
+- 3.6
+
+install:
+- pip install -r requirements.txt
+- pip install pytest-cov
+- pip install codecov
+
+script:
+- PYTHONPATH=./ pytest --cov=leopard_lavatory
+
+after_success:
+- codecov
