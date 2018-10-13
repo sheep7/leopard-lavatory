@@ -3,26 +3,16 @@ Database class, general interface for storing different objects.
 """
 import json
 from datetime import datetime
-from secrets import token_urlsafe
 
 from sqlalchemy import DateTime, Integer, String
 from sqlalchemy import create_engine, Column, ForeignKey, Table
 from sqlalchemy.ext.declarative import declarative_base, declared_attr
 from sqlalchemy.orm import sessionmaker, relationship
 
+from leopard_lavatory.utils import create_token
+
 DB_URI = 'sqlite:///leopardlavatory.sqlite'
-TOKEN_BYTES = 42
-LOG_ALL_SQL_STATEMENTS=False
-
-
-def create_token():
-    """Create a new url safe, high-entropy string that can be used as access token for for
-    example confirm, delete or modify operations.
-
-    Returns:
-        str: url safe, cryptographically secure token
-    """
-    return token_urlsafe(nbytes=TOKEN_BYTES)
+LOG_ALL_SQL_STATEMENTS = False
 
 
 class Base(object):
@@ -31,6 +21,7 @@ class Base(object):
     It uses the class name as table name and defines three default columns added to all tables:
     id, created_at and modified at."""
 
+    # noinspection PyMethodParameters
     @declared_attr
     def __tablename__(cls):
         return cls.__name__.lower()
@@ -91,9 +82,8 @@ def add_user_watchjob(user_email, watchjob_query):
 
     Args:
         user_email (str): Email address of the new user.
-        watchjob_query (json): json object representing the search query of the watchjob.
+        watchjob_query (dict): json object representing the search query of the watchjob.
     """
-    s = Session()
     new_user = User(email=user_email)
     new_watchjob = Watchjob(query=json.dumps(watchjob_query))
     new_user.watchjobs.append(new_watchjob)
@@ -101,6 +91,18 @@ def add_user_watchjob(user_email, watchjob_query):
     SESSION.add(new_watchjob)
     SESSION.commit()
     return new_user, new_watchjob
+
+
+def add_request(user_email, watchjob_query):
+    """Adds a new request to the database.
+
+    Args:
+        user_email (str): email address of the user
+        watchjob_query (dict): the search query as json object
+    """
+    new_request = UserRequest(email=user_email, query=json.dumps(watchjob_query))
+    SESSION.add(new_request)
+    SESSION.commit()
 
 
 def relate_user_watchjob(user, watchjob):
@@ -113,14 +115,36 @@ def relate_user_watchjob(user, watchjob):
     user.watchjobs.append(watchjob)
     SESSION.commit()
 
+
 def get_all_watchjobs():
+    """Return all watchjob entries from database.
+    Returns:
+        List[Watchjob]: list of all watchjobs
+    """
     return SESSION.query(Watchjob).all()
 
+
+def get_all_requests():
+    """Return all user request entries from the database.
+    Returns:
+        List[UserRequest]: list of all user requests
+    """
+    return SESSION.query(UserRequest).all()
+
+
 def delete_user(user):
+    """Delete the given user from the database.
+    Args:
+        user (User): the user to delete
+    """
     SESSION.delete(user)
     SESSION.commit()
 
 
 def delete_watchjob(watchjob):
+    """Delete the given watchjob from the database.
+    Args:
+        watchjob (Watchjob): the watchjob to delete
+    """
     SESSION.delete(watchjob)
     SESSION.commit()

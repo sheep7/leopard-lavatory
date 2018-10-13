@@ -1,7 +1,8 @@
+celery
 flask
+flower
 mechanicalsoup
 pytest
 pytest-cov
 sqlalchemy
-celery
-flower
+werkzeug
