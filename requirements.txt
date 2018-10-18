@@ -2,5 +2,6 @@ flask
 mechanicalsoup
 pytest
 pytest-cov
+PyYAML==3.*
 sqlalchemy
 werkzeug
