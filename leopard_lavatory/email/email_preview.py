@@ -3,37 +3,14 @@
 import logging
 import os
 
-import yaml
 from flask import Blueprint, Flask
 from flask import abort, render_template
+
+from leopard_lavatory.email import TEMPLATES, DEFAULT_DATA, create_email_bodies
 
 LOG = logging.getLogger(__name__)
 
 bp = Blueprint('main', __name__)
-
-TEMPLATES = []
-DEFAULT_VALUES = {}
-
-
-def read_templates():
-    """Reads the available templates from the template directory and stores them in
-    the global TEMPLATES variable, a list of template names
-    (without file endings and excluding index).
-
-    It also tries to read yml files with default values for each of the html templates
-    and if found, stores them in the DEFAULT_VALUES dictionary.
-    """
-    current_file_path = os.path.dirname(os.path.abspath(__file__))
-    templates_path = os.path.join(current_file_path, 'templates')
-    template_files = os.listdir(templates_path)
-    for file in template_files:
-        if file.endswith('.html') and not file == 'index.html':
-            TEMPLATES.append(file[:-5])
-        if file.endswith('.yml'):
-            DEFAULT_VALUES[file[:-4]] = yaml.safe_load(open(os.path.join(templates_path, file)))
-
-
-read_templates()
 
 
 @bp.route('/')
@@ -42,7 +19,7 @@ def index():
     Returns:
         Union[str, werkzeug.wrappers.Response]: a rendered template or a werkzeug Response object
     """
-    return render_template('index.html', templates=TEMPLATES)
+    return render_template('index.html', templates=TEMPLATES, default_data=DEFAULT_DATA)
 
 
 @bp.route('/<template>')
@@ -54,7 +31,12 @@ def preview_template(template):
     if template not in TEMPLATES:
         abort(404)
 
-    return render_template(f'{template}.html', **DEFAULT_VALUES.get(template, {}))
+    txt_body, html_body = create_email_bodies(template)
+
+    combined = f'{html_body[:-15]}<hr style="margin: 30px 0 0 0"><p>text-only version:</p>' \
+               f'<div style="margin: 50px"><pre>{txt_body}</pre></div></body></html>'
+
+    return combined
 
 
 def create_app():

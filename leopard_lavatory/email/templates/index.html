@@ -17,7 +17,8 @@
     <p>Available templates:</p>
     <ul>
         {% for template in templates %}
-        <li><a href="{{ template }}">{{ template }}</a></li>
+        <li><a href="{{ template }}"><strong>{{ template }}</strong>
+            (subject: {{ default_data[template].get('subject', '') }})</a></li>
         {% endfor %}
     </ul>
 </div>

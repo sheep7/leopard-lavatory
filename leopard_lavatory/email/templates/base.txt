@@ -1,0 +1,13 @@
+{{ heading }}
+-----------------------------------
+{{ summary_text }}
+
+{{ main_body_text }}
+
+{{ button_text }}: {{ button_href }}
+
+{{ second_body_text }}
+
+
+--
+{{ footer_text }}
