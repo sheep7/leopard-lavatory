@@ -3,7 +3,6 @@ import os
 import smtplib
 from email.headerregistry import Address
 from email.message import EmailMessage
-from email.utils import make_msgid
 
 import yaml
 from jinja2 import Environment, PackageLoader, select_autoescape
@@ -13,7 +12,7 @@ SMTP_SERVER = 'localhost'
 DEBUG_DRYRUN = True
 
 ENV = Environment(
-    loader=PackageLoader('leopard_lavatory.email'),
+    loader=PackageLoader('leopard_lavatory.emailer'),
     autoescape=select_autoescape(default=True)
 )
 

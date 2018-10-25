@@ -6,7 +6,7 @@ import os
 from flask import Blueprint, Flask
 from flask import abort, render_template
 
-from leopard_lavatory.email import TEMPLATES, DEFAULT_DATA, create_email_bodies
+from leopard_lavatory.emailer import TEMPLATES, DEFAULT_DATA, create_email_bodies
 
 LOG = logging.getLogger(__name__)
 
