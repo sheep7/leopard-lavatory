@@ -1,4 +1,5 @@
 flask
+Jinja2==2.*
 mechanicalsoup
 pytest
 pytest-cov
