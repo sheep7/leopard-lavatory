@@ -124,6 +124,14 @@ def get_all_watchjobs():
     return SESSION.query(Watchjob).all()
 
 
+def get_watchjob(watchjob_id):
+    """Return the specified watchjob from database.
+    Returns:
+        watchjob (Watchjob): the watchjob
+    """
+    return SESSION.query(Watchjob).filter(Watchjob.id == watchjob_id)
+
+
 def update_last_case_id(watchjob, last_case_id):
     """Update the last case ID on a watchjob
     Args:
@@ -132,7 +140,6 @@ def update_last_case_id(watchjob, last_case_id):
     """
     watchjob.last_case_id = last_case_id
     return SESSION.commit()
-
 
 def get_all_requests():
     """Return all user request entries from the database.
