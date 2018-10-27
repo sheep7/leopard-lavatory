@@ -44,13 +44,13 @@ def check_watchjob(watchjob_id, query, last_case_id):
         newer_than_case = last_case_id
 
         print('Getting all results for address {}, newer than case {}'.format(address, newer_than_case))
-        test_cases = reader.get_cases(address, newer_than_case)
+        new_cases = reader.get_cases(address, newer_than_case)
 
-        print('Found {} results'.format(len(test_cases)))
-        # print(json.dumps(test_cases, indent=2, ensure_ascii=False))
+        print('Found {} results'.format(len(new_cases)))
+        # print(json.dumps(new_cases, indent=2, ensure_ascii=False))
 
-        if len(test_cases):
-            new_last_case_id = test_cases[0]['id']
+        if len(new_cases):
+            new_last_case_id = new_cases[0]['id']
 
             watchjob = get_watchjob(watchjob_id)
 
@@ -60,18 +60,18 @@ def check_watchjob(watchjob_id, query, last_case_id):
         else:
             print('No new cases found.')
 
-        return test_cases
+        return new_cases
     else:
         return []
 
 @celery.task
-def notify_users(test_cases):
-    if test_cases:
-        print('There\'s new test cases, get the users to notify and send them an email!')
+def notify_users(new_cases):
+    if new_cases:
+        print('There\'s new cases, get the users to notify and send them an email!')
     else:
         print('Nothing to do.')
 
-    return len(test_cases)
+    return len(new_cases)
 
 @celery.task()
 def b(email, query):
