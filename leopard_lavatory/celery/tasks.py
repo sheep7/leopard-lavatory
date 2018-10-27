@@ -5,6 +5,8 @@ from leopard_lavatory.celery.celery_factory import make_celery
 from leopard_lavatory.storage.database import get_all_watchjobs, add_user_watchjob, update_last_case_id, get_watchjob
 from leopard_lavatory.readers.sthlm_sbk import SBKReader
 
+from celery.schedules import crontab
+
 flask_app = Flask(__name__)
 flask_app.config.update(
     CELERY_BROKER_URL='redis://localhost:6379',
@@ -14,13 +16,15 @@ celery = make_celery(flask_app)
 
 @celery.on_after_configure.connect
 def setup_periodic_task(sender, **kwargs):
-    #sender.add_periodic_task(10.0, print_all_watchjobs.s(), name="print_all_watchjobs")
-    #sender.add_periodic_task(15.0, b.s('test@example.com', {'a':'b'}),
-    #                         name="add_user_watchjob")
-    sender.add_periodic_task(10.0, check_watchjob.s("Brunnsgatan 1", '2008-09960'), name="Check Brunnsgatan 1")
+    sender.add_periodic_task(
+        # run jobs once an hour, every day between 8 in the morning and 8 in the evening
+        crontab(hour=list(range(8-20)), minute=-0),
+        run_all_watchjobs.s(),
+        name="Run watchjobs"
+        )
 
 @celery.task
-def print_all_watchjobs():
+def run_all_watchjobs():
     print('Running all watch jobs...')
     watchjobs = get_all_watchjobs()
     for watchjob in watchjobs:
