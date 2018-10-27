@@ -129,7 +129,7 @@ def get_watchjob(watchjob_id):
     Returns:
         watchjob (Watchjob): the watchjob
     """
-    return SESSION.query(Watchjob).filter(Watchjob.id == watchjob_id)
+    return SESSION.query(Watchjob).filter(Watchjob.id == watchjob_id).first()
 
 
 def update_last_case_id(watchjob, last_case_id):
