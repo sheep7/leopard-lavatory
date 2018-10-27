@@ -19,28 +19,28 @@ def setup_periodic_task(sender, **kwargs):
     #                         name="add_user_watchjob")
     sender.add_periodic_task(10.0, check_watchjob.s("Brunnsgatan 1", '2008-09960'), name="Check Brunnsgatan 1")
 
-@celery.task()
+@celery.task
 def print_all_watchjobs():
     print('Running all watch jobs...')
     watchjobs = get_all_watchjobs()
     for watchjob in watchjobs:
         print(watchjob)
 
-        (check_watchjob.s(watchjob.id, watchjob.query, watchjob.last_case_id) | notify_users.s()).apply_async()
+        (check_watchjob.s(watchjob.id, watchjob.query, watchjob.last_case_id) | notify_users.s(watchjob.id)).apply_async()
 
 @celery.task
-def check_watchjob(watchjob_id, query, last_case_id):
+def check_watchjob(watchjob_id, query_json, last_case_id):
     reader = SBKReader()
 
     try:
-        q = json.loads(query)
+        query = json.loads(query_json)
     except ValueError as e:
         # JSON parsing error, just return nothing
         print('Error parsing JSON: %s' % e)
         return []
 
-    if 'street' in q:
-        address = q['street']
+    if 'street' in query:
+        address = query['street']
         newer_than_case = last_case_id
 
         print('Getting all results for address {}, newer than case {}'.format(address, newer_than_case))
@@ -65,9 +65,14 @@ def check_watchjob(watchjob_id, query, last_case_id):
         return []
 
 @celery.task
-def notify_users(new_cases):
+def notify_users(new_cases, watchjob_id):
     if new_cases:
-        print('There\'s new cases, get the users to notify and send them an email!')
+        print('There\'s new cases, get the users for watch job {} and notify them!'.format(watchjob_id))
+
+        watchjob = get_watchjob(watchjob_id)
+
+        # TODO send actual emails
+        print('Sending notifications to {}'.format([user.email for user in watchjob.users]))
     else:
         print('Nothing to do.')
 
