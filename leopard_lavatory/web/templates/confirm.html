@@ -1,0 +1,49 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Bekräfta bevakning - Leopard Lavatory</title>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+</head>
+<body>
+
+{% for message in get_flashed_messages() %}
+<!-- Note -->
+<div class="note">
+    <h4>{{ message }}</h4>
+</div>
+{% endfor %}
+
+<!-- Header -->
+<div class="header">
+    <h1>Bekräfta bevakning</h1>
+</div>
+
+<!-- Navigation Bar -->
+<div class="navbar">
+    <a href="#">Skapa bevakning</a>
+    <a href="#">Hjälp+Info</a>
+</div>
+
+<!-- The flexible grid (content) -->
+<div class="row">
+    <div class="main">
+        <h2>Skapa bevakning</h2>
+        <form class="confirm_form" method="post">
+            <input type="hidden" name="action" value="confirm">
+            <label for="token">token:</label>
+            <input type="text" id="token" name="token"
+                   placeholder="token" required>
+            <input type="submit" value="Bekräfta bevakning" title="bekräfta bevakning">
+        </form>
+    </div>
+</div>
+
+<!-- Footer -->
+<div class="footer">
+    <a href="#">Integritetspolicy</a>
+</div>
+
+</body>
+</html>

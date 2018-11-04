@@ -105,6 +105,17 @@ def add_request(user_email, watchjob_query):
     SESSION.commit()
 
 
+def confirm_request(token):
+    """Finds the request for the given token and turns it into a user.
+
+    Args:
+        token (str): token
+    """
+    request = SESSION.query(UserRequest).filter(UserRequest.confirm_token == token).one()
+    user, watchjob = add_user_watchjob(request.email, json.loads(request.query))
+    return user
+
+
 def relate_user_watchjob(user, watchjob):
     """Relate an existing user to an existing watchjob.
 
