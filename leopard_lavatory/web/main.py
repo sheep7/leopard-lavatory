@@ -8,7 +8,7 @@ from werkzeug.utils import redirect
 from leopard_lavatory.storage.database import add_request, get_all_requests, confirm_request
 from leopard_lavatory.utils import valid_email, valid_address, log_safe
 
-from sqlalchemy.exc import DBAPIError
+from sqlalchemy.exc import DBAPIError, IntegrityError
 from sqlalchemy.orm.exc import NoResultFound
 
 LOG = logging.getLogger(__name__)
@@ -61,6 +61,10 @@ def handle_confirm_request(token):
     except NoResultFound as err:
         LOG.error(str(err))
         flash('Ogiltigt token')
+    except IntegrityError as err:
+        # most likely adding the user violated the unique constraint
+        LOG.error(str(err))
+        flash('Användare redan existerar')
     # TODO more error handling
 
 @bp.route('/', methods=('GET', 'POST'))
@@ -78,7 +82,7 @@ def index():
         return render_template('index.html')
 
 @bp.route('/confirm', methods=('GET', 'POST'))
-def confirm(token):
+def confirm():
     """Render the confirmation page and confirm user requests (ie create a user).
     Returns:
         Union[str, werkzeug.wrappers.Response]: a rendered template or a werkzeug Response object
