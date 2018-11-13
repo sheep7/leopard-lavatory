@@ -1,4 +1,6 @@
+celery
 flask
+flower
 mechanicalsoup
 pytest
 pytest-cov

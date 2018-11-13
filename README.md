@@ -28,3 +28,41 @@ inspired by the frustrating similarity of reality with _The Hitchhikers Guide to
   have been on display in your local planning department in Alpha Centauri for fifty of your Earth
   years, so you've had plenty of time to lodge any formal complaint and it's far too late to start 
   making a fuss about it now.'
+
+## Running in development
+
+Install all requirements (preferably in a `virtualenv`):
+
+```
+$ pip install -r requirements.txt
+```
+
+Then run the app using:
+
+```
+$ FLASK_APP=leopard_lavatory/web FLASK_SECRET_KEY=somesecretkey flask run
+```
+
+If you like, you can put the variable declarations in your virtualenv's `bin/activate` script and simply run `flask run`.
+
+## Running celery
+
+To run celery, we need at least one worker (a process that awaits tasks, runs them and returns the results). A worker needs RabbitMQ or redis to be running as well. Please install one of the two.
+
+To run the worker itself, run the following command from the root of the project:
+
+```
+$ celery -A leopard_lavatory.celery.tasks worker
+```
+
+If there are periodally scheduled tasks, we also need a beat process to send tasks to the worker(s) according to the schedule:
+
+```
+$ celery -A leopard_lavatory.celery.tasks beat
+```
+
+Optionally, to see our tasks on a web interface, run flower (the example uses redis with default config as a broker):
+
+```
+$ flower --broker=redis://localhost:6379
+```
