@@ -10,6 +10,7 @@ from sqlalchemy.ext.declarative import declarative_base, declared_attr
 from sqlalchemy.orm import sessionmaker, relationship
 
 from leopard_lavatory.utils import create_token
+from contextlib import contextmanager
 
 DB_URI = 'sqlite:///leopardlavatory.sqlite'
 LOG_ALL_SQL_STATEMENTS = False
@@ -71,7 +72,19 @@ engine = create_engine(DB_URI, echo=LOG_ALL_SQL_STATEMENTS)
 
 # create session factory and a global session
 Session = sessionmaker(bind=engine)
-SESSION = Session()
+
+@contextmanager
+def session_scope():
+    """Provide a transactional scope around a series of operations."""
+    session = Session()
+    try:
+        yield session
+        session.commit()
+    except:
+        session.rollback()
+        raise
+    finally:
+        session.close()
 
 # create all tables if they not exist yet
 Base.metadata.create_all(engine)
@@ -84,13 +97,13 @@ def add_user_watchjob(user_email, watchjob_query):
         user_email (str): Email address of the new user.
         watchjob_query (dict): json object representing the search query of the watchjob.
     """
-    new_user = User(email=user_email)
-    new_watchjob = Watchjob(query=json.dumps(watchjob_query))
-    new_user.watchjobs.append(new_watchjob)
-    SESSION.add(new_user)
-    SESSION.add(new_watchjob)
-    SESSION.commit()
-    return new_user, new_watchjob
+    with session_scope() as session:
+        new_user = User(email=user_email)
+        new_watchjob = Watchjob(query=json.dumps(watchjob_query))
+        new_user.watchjobs.append(new_watchjob)
+        session.add(new_user)
+        session.add(new_watchjob)
+        return new_user, new_watchjob
 
 
 def add_request(user_email, watchjob_query):
@@ -100,9 +113,9 @@ def add_request(user_email, watchjob_query):
         user_email (str): email address of the user
         watchjob_query (dict): the search query as json object
     """
-    new_request = UserRequest(email=user_email, query=json.dumps(watchjob_query))
-    SESSION.add(new_request)
-    SESSION.commit()
+    with session_scope() as session:
+        new_request = UserRequest(email=user_email, query=json.dumps(watchjob_query))
+        session.add(new_request)
 
 
 def relate_user_watchjob(user, watchjob):
@@ -112,8 +125,8 @@ def relate_user_watchjob(user, watchjob):
         user (User): the user object
         watchjob (Watchjob): the watchjob object
     """
-    user.watchjobs.append(watchjob)
-    SESSION.commit()
+    with session_scope() as session:
+        user.watchjobs.append(watchjob)
 
 
 def get_all_watchjobs():
@@ -121,7 +134,8 @@ def get_all_watchjobs():
     Returns:
         List[Watchjob]: list of all watchjobs
     """
-    return SESSION.query(Watchjob).all()
+    with session_scope() as session:
+        return session.query(Watchjob).all()
 
 
 def get_watchjob(watchjob_id):
@@ -129,7 +143,8 @@ def get_watchjob(watchjob_id):
     Returns:
         watchjob (Watchjob): the watchjob
     """
-    return SESSION.query(Watchjob).filter(Watchjob.id == watchjob_id).first()
+    with session_scope() as session:
+        return session.query(Watchjob).filter(Watchjob.id == watchjob_id).first()
 
 
 def update_last_case_id(watchjob, last_case_id):
@@ -138,15 +153,17 @@ def update_last_case_id(watchjob, last_case_id):
         watchjob: the watchjob to update
         last_case_id: the new last_case_id
     """
-    watchjob.last_case_id = last_case_id
-    return SESSION.commit()
+    with session_scope() as session:
+        watchjob.last_case_id = last_case_id
+        return session.commit()
 
 def get_all_requests():
     """Return all user request entries from the database.
     Returns:
         List[UserRequest]: list of all user requests
     """
-    return SESSION.query(UserRequest).all()
+    with session_scope() as session:
+        return session.query(UserRequest).all()
 
 
 def delete_user(user):
@@ -154,8 +171,8 @@ def delete_user(user):
     Args:
         user (User): the user to delete
     """
-    SESSION.delete(user)
-    SESSION.commit()
+    with session_scope() as session:
+        session.delete(user)
 
 
 def delete_watchjob(watchjob):
@@ -163,5 +180,5 @@ def delete_watchjob(watchjob):
     Args:
         watchjob (Watchjob): the watchjob to delete
     """
-    SESSION.delete(watchjob)
-    SESSION.commit()
+    with session_scope() as session:
+        session.delete(watchjob)
