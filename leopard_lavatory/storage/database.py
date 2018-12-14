@@ -117,6 +117,11 @@ def add_request(user_email, watchjob_query):
         new_request = UserRequest(email=user_email, query=json.dumps(watchjob_query))
         session.add(new_request)
 
+        # persist so that the token gets generated
+        session.flush()
+
+        return new_request.confirm_token
+
 
 def relate_user_watchjob(user, watchjob):
     """Relate an existing user to an existing watchjob.

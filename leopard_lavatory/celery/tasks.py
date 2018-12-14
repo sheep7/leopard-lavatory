@@ -1,6 +1,8 @@
 import json
+import os
 
 from flask import Flask
+from flask_mail import Mail, Message
 from leopard_lavatory.celery.celery_factory import make_celery
 from leopard_lavatory.storage.database import get_all_watchjobs, add_user_watchjob, update_last_case_id, get_watchjob
 from leopard_lavatory.readers.sthlm_sbk import SBKReader
@@ -10,9 +12,21 @@ from celery.schedules import crontab
 flask_app = Flask(__name__)
 flask_app.config.update(
     CELERY_BROKER_URL='redis://localhost:6379',
-    CELERY_RESULT_BACKEND='redis://localhost:6379'
+    CELERY_RESULT_BACKEND='redis://localhost:6379',
+    MAIL_SERVER = os.environ['FLASK_MAIL_SERVER'],
+    MAIL_PORT = 587,
+    MAIL_DEBUG = True,
+    MAIL_USE_TLS = True,
+    MAIL_USE_SSL = False,
+    MAIL_USERNAME = os.environ['FLASK_MAIL_USERNAME'],
+    MAIL_PASSWORD = os.environ['FLASK_MAIL_PASSWORD'],
+    MAIL_DEFAULT_SENDER = os.environ['FLASK_MAIL_DEFAULT_SENDER'],
 )
 celery = make_celery(flask_app)
+
+mail = Mail(flask_app)
+
+mail.debug = True
 
 @celery.on_after_configure.connect
 def setup_periodic_task(sender, **kwargs):
@@ -81,6 +95,16 @@ def notify_users(new_cases, watchjob_id):
         print('Nothing to do.')
 
     return len(new_cases)
+
+
+@celery.task
+def send_confirm_email(email_address, token):
+    msg = Message("Confirm!",
+            recipients=[os.environ['FLASK_MAIL_RECIPIENT']])
+    msg.body = "Use this to confirm: {}".format(token)
+    msg.html = "<p><b>Use this to confirm:</b></p><p>{}</p>".format(token)
+
+    mail.send(msg)
 
 @celery.task()
 def b(email, query):

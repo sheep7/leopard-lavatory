@@ -3,15 +3,16 @@
 import logging
 
 from flask import Blueprint, flash, render_template, request, url_for
+from flask_mail import Mail, Message
 from werkzeug.utils import redirect
 
 from leopard_lavatory.storage.database import add_request, get_all_requests
 from leopard_lavatory.utils import valid_email, valid_address, log_safe
+from leopard_lavatory.celery.tasks import send_confirm_email
 
 LOG = logging.getLogger(__name__)
 
 bp = Blueprint('main', __name__)
-
 
 def handle_new_request(email, address):
     """Handle new watchjob requests submitted to the website.
@@ -28,8 +29,10 @@ def handle_new_request(email, address):
         assert valid_email(email), f'Got invalid email: {log_safe(email)}'
 
         # TODO:  do street/fastighet distinction
-        add_request(email, watchjob_query={'street': address})
-        LOG.debug('Request stored in database.')
+        request_token = add_request(email, watchjob_query={'street': address})
+        LOG.debug(f'Request stored in database (token: {request_token}).')
+
+        send_confirm_email.apply_async(args=[email, request_token])
 
         flash(f'Tagit emot bevakningsförfrågan. '
               f'Aktivera den med länken som skickades till {email}.')
