@@ -6,9 +6,11 @@ from flask_mail import Mail, Message
 from leopard_lavatory.celery.celery_factory import make_celery
 from leopard_lavatory.storage.database import get_all_watchjobs, add_user_watchjob, update_last_case_id, get_watchjob
 from leopard_lavatory.readers.sthlm_sbk import SBKReader
+from leopard_lavatory.emailer import create_email_bodies
 
 from celery.schedules import crontab
 
+# TODO separate email tasks in separate file
 flask_app = Flask(__name__)
 flask_app.config.update(
     CELERY_BROKER_URL='redis://localhost:6379',
@@ -99,10 +101,11 @@ def notify_users(new_cases, watchjob_id):
 
 @celery.task
 def send_confirm_email(email_address, token):
+    text_body, html_body = create_email_bodies('activation', { 'button_href': 'https://bash.org' })
     msg = Message("Confirm!",
             recipients=[os.environ['FLASK_MAIL_RECIPIENT']])
-    msg.body = "Use this to confirm: {}".format(token)
-    msg.html = "<p><b>Use this to confirm:</b></p><p>{}</p>".format(token)
+    msg.body = text_body
+    msg.html = html_body
 
     mail.send(msg)
 
