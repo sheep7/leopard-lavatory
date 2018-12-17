@@ -1,9 +1,11 @@
 celery
 flask
 flower
+Jinja2==2.*
 mechanicalsoup
 pytest
 pytest-cov
+PyYAML==3.*
 sqlalchemy
 werkzeug
 flask-mail
