@@ -37,28 +37,23 @@
             <input type="text" id="addressinput" name="address" onchange="refreshMap()"
                    placeholder="gatuadress eller fastighet" required>
             <label for="emailinput">mejl:</label>
-            <input type="email" id="emailinput" name="email" placeholder="mejladress" required>
+            <input id="emailinput" name="email" placeholder="e-post address" required type="email">
             <input type="submit" value="Skapa bevakning" title="skapa bevakning">
         </form>
     </div>
     <div class="side">
          <iframe class="mapframe" id="mapframe" src="https://kartor.stockholm.se"></iframe>
     </div>
-    <script>
-        function refreshMap() {
-            var mf = document.getElementById("mapframe");
-            var address = document.getElementById("addressinput").value;
-            mf.src = "https://kartor.stockholm.se"
-                   + "/bios/dpwebmap/cust_sth/sbk/sthlm_sse/DPWebMap.html?"
-                   + "zoom=7&layers=TTTB000000000T&super_search=" + address;
-        }
-    </script>
 </div>
 
 <!-- Footer -->
 <div class="footer">
     <a href="#">Integritetspolicy</a>
 </div>
+
+
+<script src="{{ url_for('static', filename='auto-complete.js') }}" type="text/javascript"></script>
+<script src="{{ url_for('static', filename='main.js') }}" type="text/javascript"></script>
 
 </body>
 </html>
