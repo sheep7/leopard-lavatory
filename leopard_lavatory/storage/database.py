@@ -73,117 +73,80 @@ engine = create_engine(DB_URI, echo=LOG_ALL_SQL_STATEMENTS)
 # create session factory and a global session
 Session = sessionmaker(bind=engine)
 
+
 @contextmanager
-def session_scope():
+def database_session():
     """Provide a transactional scope around a series of operations."""
-    session = Session()
+    dbs = Session()
     try:
-        yield session
-        session.commit()
+        yield dbs
+        dbs.commit()
     except:
-        session.rollback()
+        dbs.rollback()
         raise
     finally:
-        session.close()
+        dbs.close()
+
 
 # create all tables if they not exist yet
 Base.metadata.create_all(engine)
 
 
-def add_user_watchjob(user_email, watchjob_query):
+def add_user_watchjob(dbs, user_email, watchjob_query):
     """Add a new user and watchjob to the database and relate them.
 
     Args:
+        dbs (sqlalchemy.orm.session.Session): database session
         user_email (str): Email address of the new user.
         watchjob_query (dict): json object representing the search query of the watchjob.
     """
-    with session_scope() as session:
-        new_user = User(email=user_email)
-        new_watchjob = Watchjob(query=json.dumps(watchjob_query))
-        new_user.watchjobs.append(new_watchjob)
-        session.add(new_user)
-        session.add(new_watchjob)
-        return new_user, new_watchjob
+    new_user = User(email=user_email)
+    new_watchjob = Watchjob(query=json.dumps(watchjob_query))
+    new_user.watchjobs.append(new_watchjob)
+    dbs.add(new_user)
+    dbs.add(new_watchjob)
+    return new_user, new_watchjob
 
 
-def add_request(user_email, watchjob_query):
+def add_request(dbs, user_email, watchjob_query):
     """Adds a new request to the database.
 
     Args:
+        dbs (sqlalchemy.orm.session.Session): database session
         user_email (str): email address of the user
         watchjob_query (dict): the search query as json object
     """
-    with session_scope() as session:
-        new_request = UserRequest(email=user_email, query=json.dumps(watchjob_query))
-        session.add(new_request)
+    new_request = UserRequest(email=user_email, query=json.dumps(watchjob_query))
+    dbs.add(new_request)
 
-        # persist so that the token gets generated
-        session.flush()
+    # persist so that the token gets generated #TODO: check if that is still needed
+    dbs.flush()
 
-        return new_request.confirm_token
-
-
-def relate_user_watchjob(user, watchjob):
-    """Relate an existing user to an existing watchjob.
-
-    Args:
-        user (User): the user object
-        watchjob (Watchjob): the watchjob object
-    """
-    with session_scope() as session:
-        user.watchjobs.append(watchjob)
+    return new_request.confirm_token
 
 
-def get_all_watchjobs():
+def get_all_watchjobs(dbs):
     """Return all watchjob entries from database.
     Returns:
+        dbs (sqlalchemy.orm.dbs.Session): database session
         List[Watchjob]: list of all watchjobs
     """
-    with session_scope() as session:
-        return session.query(Watchjob).all()
+    return dbs.query(Watchjob).all()
 
 
-def get_watchjob(watchjob_id):
+def get_watchjob(dbs, watchjob_id):
     """Return the specified watchjob from database.
     Returns:
+        dbs (sqlalchemy.orm.session.Session): database session
         watchjob (Watchjob): the watchjob
     """
-    with session_scope() as session:
-        return session.query(Watchjob).filter(Watchjob.id == watchjob_id).first()
+    return dbs.query(Watchjob).filter(Watchjob.id == watchjob_id).first()
 
 
-def update_last_case_id(watchjob, last_case_id):
-    """Update the last case ID on a watchjob
-    Args:
-        watchjob: the watchjob to update
-        last_case_id: the new last_case_id
-    """
-    with session_scope() as session:
-        watchjob.last_case_id = last_case_id
-        return session.commit()
-
-def get_all_requests():
+def get_all_requests(dbs):
     """Return all user request entries from the database.
     Returns:
+        dbs (sqlalchemy.orm.session.Session): database session
         List[UserRequest]: list of all user requests
     """
-    with session_scope() as session:
-        return session.query(UserRequest).all()
-
-
-def delete_user(user):
-    """Delete the given user from the database.
-    Args:
-        user (User): the user to delete
-    """
-    with session_scope() as session:
-        session.delete(user)
-
-
-def delete_watchjob(watchjob):
-    """Delete the given watchjob from the database.
-    Args:
-        watchjob (Watchjob): the watchjob to delete
-    """
-    with session_scope() as session:
-        session.delete(watchjob)
+    return dbs.query(UserRequest).all()
