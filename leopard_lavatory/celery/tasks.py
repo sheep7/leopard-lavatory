@@ -15,14 +15,14 @@ flask_app = Flask(__name__)
 flask_app.config.update(
     CELERY_BROKER_URL='redis://localhost:6379',
     CELERY_RESULT_BACKEND='redis://localhost:6379',
-    MAIL_SERVER = os.environ['FLASK_MAIL_SERVER'],
+    MAIL_SERVER = os.environ.get('FLASK_MAIL_SERVER'),
     MAIL_PORT = 587,
     MAIL_DEBUG = True,
     MAIL_USE_TLS = True,
     MAIL_USE_SSL = False,
-    MAIL_USERNAME = os.environ['FLASK_MAIL_USERNAME'],
-    MAIL_PASSWORD = os.environ['FLASK_MAIL_PASSWORD'],
-    MAIL_DEFAULT_SENDER = os.environ['FLASK_MAIL_DEFAULT_SENDER'],
+    MAIL_USERNAME = os.environ.get('FLASK_MAIL_USERNAME'),
+    MAIL_PASSWORD = os.environ.get('FLASK_MAIL_PASSWORD'),
+    MAIL_DEFAULT_SENDER = os.environ.get('FLASK_MAIL_DEFAULT_SENDER'),
 )
 celery = make_celery(flask_app)
 
