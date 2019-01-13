@@ -6,7 +6,7 @@ from flask import Blueprint, flash, render_template, request, url_for
 from flask_mail import Mail, Message
 from werkzeug.utils import redirect
 
-from leopard_lavatory.storage.database import add_request, get_all_requests
+from leopard_lavatory.storage.database import add_request, get_all_requests, database_session
 from leopard_lavatory.utils import valid_email, valid_address, log_safe
 from leopard_lavatory.celery.tasks import send_confirm_email
 
@@ -24,23 +24,24 @@ def handle_new_request(email, address):
         address (str): untrusted user input string for the address
     """
     LOG.info(f'Received new request for address: {log_safe(address)}, email: {log_safe(email)}')
-    try:
-        assert valid_address(address), f'Got invalid address: {log_safe(address)}'
-        assert valid_email(email), f'Got invalid email: {log_safe(email)}'
+    with database_session() as dbs:
+        try:
+            assert valid_address(address), f'Got invalid address: {log_safe(address)}'
+            assert valid_email(email), f'Got invalid email: {log_safe(email)}'
 
-        # TODO:  do street/fastighet distinction
-        request_token = add_request(email, watchjob_query={'street': address})
-        LOG.debug(f'Request stored in database (token: {request_token}).')
+            # TODO:  do street/fastighet distinction
+            request_token = add_request(dbs, email, watchjob_query={'street': address})
+            LOG.debug(f'Request stored in database (token: {request_token}).')
 
-        send_confirm_email.apply_async(args=[email, request_token])
+            send_confirm_email.apply_async(args=[email, request_token])
 
-        flash(f'Tagit emot bevakningsförfrågan. '
-              f'Aktivera den med länken som skickades till {email}.')
-    except AssertionError as error:
-        LOG.error(str(error))
-        flash('Någonting har gått fel, tyvärr.')
+            flash(f'Tagit emot bevakningsförfrågan. '
+                  f'Aktivera den med länken som skickades till {email}.')
+        except AssertionError as error:
+            LOG.error(str(error))
+            flash('Någonting har gått fel, tyvärr.')
 
-    LOG.debug('All requests in database:\n  %s', '\n  '.join([str(r) for r in get_all_requests()]))
+        LOG.debug('All requests in database:\n  %s', '\n  '.join([str(r) for r in get_all_requests(dbs)]))
 
 
 @bp.route('/', methods=('GET', 'POST'))

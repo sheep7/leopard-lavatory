@@ -10,6 +10,9 @@ install:
 - pip install pytest-cov
 - pip install codecov
 
+services:
+  - redis-server
+
 script:
 - PYTHONPATH=./ pytest --cov=leopard_lavatory
 
