@@ -103,8 +103,8 @@ def notify_users(new_cases, watchjob_id):
 
 
 @celery.task
-def send_confirm_email(email_address, token):
-    text_body, html_body = create_email_bodies('activation', { 'button_href': 'https://bash.org' })
+def send_confirm_email(email_address, confirm_link):
+    text_body, html_body = create_email_bodies('activation', { 'button_href': confirm_link })
     msg = Message("Confirm!",
             recipients=[os.environ['FLASK_MAIL_RECIPIENT']])
     msg.body = text_body

@@ -38,7 +38,9 @@ def handle_new_request(email, address):
             request_token = add_request(dbs, email, watchjob_query={'street': address})
             LOG.debug(f'Request stored in database (token: {request_token}).')
 
-            send_confirm_email.apply_async(args=[email, request_token])
+            confirm_link = urllib.parse.urljoin(request.url_root, url_for('main.confirm', t=request_token))
+
+            send_confirm_email.apply_async(args=[email, confirm_link])
 
             flash(f'Tagit emot bevakningsförfrågan. '
                   f'Aktivera den med länken som skickades till {email}.')
