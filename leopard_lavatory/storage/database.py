@@ -100,8 +100,8 @@ def add_user_watchjob(dbs, user_email, watchjob_query):
         user_email (str): Email address of the new user.
         watchjob_query (dict): json object representing the search query of the watchjob.
     """
-    user = dbs.query(User).filter(User.email == user_email).one()
-    if not user:
+    user = dbs.query(User).filter(User.email == user_email).one_or_none()
+    if user is None:
         user = User(email=user_email)
         dbs.add(user)
 
