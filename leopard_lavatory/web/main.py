@@ -66,15 +66,10 @@ def handle_confirm_request(token):
             LOG.debug(f'Created user {user.email}')
 
             flash('Bevakningsförfrågan aktiverades!', f'Framöver kommer du att få mejl på {user.email} när ärenden om din adress dyker upp.')
-        except NoResultFound as err:
+        except (NoResultFound, IntegrityError) as err:
+            # most likely adding the user violated the unique constraint, or the token was invalid
             LOG.error(str(err))
-            flash('Ogiltigt token')
-        # TODO do not reveal that the user already exists
-        except IntegrityError as err:
-            # most likely adding the user violated the unique constraint
-            LOG.error(str(err))
-            flash('Användare redan existerar')
-        # TODO more error handling
+            flash('Ogiltigt token eller något annat gick fel')
 
 @bp.route('/', methods=('GET', 'POST'))
 def index():
