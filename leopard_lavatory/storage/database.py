@@ -2,6 +2,7 @@
 Database class, general interface for storing different objects.
 """
 import json
+from contextlib import contextmanager
 from datetime import datetime
 
 from sqlalchemy import DateTime, Integer, String
@@ -10,7 +11,6 @@ from sqlalchemy.ext.declarative import declarative_base, declared_attr
 from sqlalchemy.orm import sessionmaker, relationship
 
 from leopard_lavatory.utils import create_token
-from contextlib import contextmanager
 
 DB_URI = 'sqlite:///leopardlavatory.sqlite'
 LOG_ALL_SQL_STATEMENTS = False
@@ -127,10 +127,12 @@ def add_request(dbs, user_email, watchjob_query):
 
     return new_request.confirm_token
 
+
 def confirm_request(dbs, token):
     """Finds the request for the given token and turns it into a user.
 
     Args:
+        dbs (sqlalchemy.orm.dbs.Session): database session
         token (str): token
     """
     request = dbs.query(UserRequest).filter(UserRequest.confirm_token == token).one()

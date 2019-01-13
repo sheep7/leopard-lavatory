@@ -7,8 +7,11 @@ Class SthlmStreetsFastigheter
 Crawling a list of all street addresses and fastighet names from kartor.stockholm.se
 """
 import json
+import logging
 
 from leopard_lavatory.readers.base_reader import BaseReader
+
+LOG = logging.getLogger(__name__)
 
 
 class SthlmStreetsProperties(BaseReader):
@@ -88,6 +91,6 @@ class SthlmStreetsProperties(BaseReader):
             if not num_rows < max_rows:
                 self.log.error('Probably missed results due to too low max_row value. Got {} '
                                'rows and requested max {} rows.'.format(num_rows, max_rows))
-            print(streets.keys())
-            print(properties.keys())
+            LOG.debug(streets.keys())
+            LOG.debug(properties.keys())
             break

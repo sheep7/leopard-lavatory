@@ -1,5 +1,6 @@
 from celery import Celery
 
+
 def make_celery(app):
     celery = Celery(
         app.import_name,
@@ -13,5 +14,6 @@ def make_celery(app):
             with app.app_context():
                 return self.run(*args, **kwargs)
 
+    # noinspection PyPropertyAccess
     celery.Task = ContextTask
     return celery

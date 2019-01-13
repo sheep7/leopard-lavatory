@@ -3,16 +3,14 @@
 import logging
 import urllib.parse
 
-from flask import Blueprint, flash, render_template, request, url_for, request
-from flask_mail import Mail, Message
+from flask import Blueprint, flash, render_template, url_for, request
+from sqlalchemy.exc import IntegrityError
+from sqlalchemy.orm.exc import NoResultFound
 from werkzeug.utils import redirect
 
-from leopard_lavatory.storage.database import add_request, get_all_requests, database_session, confirm_request
-from leopard_lavatory.utils import valid_email, valid_address, log_safe
 from leopard_lavatory.celery.tasks import send_confirm_email
-
-from sqlalchemy.exc import DBAPIError, IntegrityError
-from sqlalchemy.orm.exc import NoResultFound
+from leopard_lavatory.storage.database import add_request, database_session, confirm_request
+from leopard_lavatory.utils import valid_email, valid_address, log_safe
 
 LOG = logging.getLogger(__name__)
 
@@ -65,11 +63,13 @@ def handle_confirm_request(token):
             user = confirm_request(dbs, token)
             LOG.debug(f'Created user {user.email}')
 
-            flash('Bevakningsförfrågan aktiverades!', f'Framöver kommer du att få mejl på {user.email} när ärenden om din adress dyker upp.')
+            flash('Bevakningsförfrågan aktiverades!',
+                  f'Framöver kommer du att få mejl på {user.email} när ärenden om din adress dyker upp.')
         except (NoResultFound, IntegrityError) as err:
             # most likely adding the user violated the unique constraint, or the token was invalid
             LOG.error(str(err))
             flash('Ogiltigt token eller något annat gick fel')
+
 
 @bp.route('/', methods=('GET', 'POST'))
 def index():
@@ -84,6 +84,7 @@ def index():
 
     if request.method == 'GET':
         return render_template('index.html')
+
 
 @bp.route('/confirm', methods=('GET', 'POST'))
 def confirm():

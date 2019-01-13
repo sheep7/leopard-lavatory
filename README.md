@@ -43,11 +43,13 @@ Then run the app using:
 $ FLASK_APP=leopard_lavatory/web FLASK_SECRET_KEY=somesecretkey flask run
 ```
 
-If you like, you can put the variable declarations in your virtualenv's `bin/activate` script and simply run `flask run`.
+If you like, you can put the variable declarations in your virtualenv's `bin/activate` script and simply run
+`flask run`.
 
 ## Running celery
 
-To run celery, we need at least one worker (a process that awaits tasks, runs them and returns the results). A worker needs RabbitMQ or redis to be running as well. Please install one of the two.
+To run celery, we need at least one worker (a process that awaits tasks, runs them and returns the results).
+A worker needs RabbitMQ or redis to be running as well. Please install one of the two.
 
 To run the worker itself, run the following command from the root of the project:
 
@@ -55,7 +57,8 @@ To run the worker itself, run the following command from the root of the project
 $ celery -A leopard_lavatory.celery.tasks worker
 ```
 
-If there are periodally scheduled tasks, we also need a beat process to send tasks to the worker(s) according to the schedule:
+If there are periodally scheduled tasks, we also need a beat process to send tasks to the worker(s) according to the
+schedule:
 
 ```
 $ celery -A leopard_lavatory.celery.tasks beat

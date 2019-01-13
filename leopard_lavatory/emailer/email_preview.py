@@ -34,7 +34,7 @@ def preview_template(template):
     txt_body, html_body = create_email_bodies(template)
 
     combined = f'{html_body[:-15]}<hr style="margin: 30px 0 0 0"><p>text-only version:</p>' \
-               f'<div style="margin: 50px"><pre>{txt_body}</pre></div></body></html>'
+        f'<div style="margin: 50px"><pre>{txt_body}</pre></div></body></html>'
 
     return combined
 
