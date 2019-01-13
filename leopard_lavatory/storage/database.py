@@ -10,6 +10,7 @@ from sqlalchemy.ext.declarative import declarative_base, declared_attr
 from sqlalchemy.orm import sessionmaker, relationship
 
 from leopard_lavatory.utils import create_token
+from contextlib import contextmanager
 
 DB_URI = 'sqlite:///leopardlavatory.sqlite'
 LOG_ALL_SQL_STATEMENTS = False
@@ -71,39 +72,55 @@ engine = create_engine(DB_URI, echo=LOG_ALL_SQL_STATEMENTS)
 
 # create session factory and a global session
 Session = sessionmaker(bind=engine)
-SESSION = Session()
+
+
+@contextmanager
+def database_session():
+    """Provide a transactional scope around a series of operations."""
+    dbs = Session()
+    try:
+        yield dbs
+        dbs.commit()
+    except:
+        dbs.rollback()
+        raise
+    finally:
+        dbs.close()
+
 
 # create all tables if they not exist yet
 Base.metadata.create_all(engine)
 
 
-def add_user_watchjob(user_email, watchjob_query):
+def add_user_watchjob(dbs, user_email, watchjob_query):
     """Add a new user and watchjob to the database and relate them.
 
     Args:
+        dbs (sqlalchemy.orm.session.Session): database session
         user_email (str): Email address of the new user.
         watchjob_query (dict): json object representing the search query of the watchjob.
     """
     new_user = User(email=user_email)
     new_watchjob = Watchjob(query=json.dumps(watchjob_query))
     new_user.watchjobs.append(new_watchjob)
-    SESSION.add(new_user)
-    SESSION.add(new_watchjob)
-    SESSION.commit()
+    dbs.add(new_user)
+    dbs.add(new_watchjob)
     return new_user, new_watchjob
 
 
-def add_request(user_email, watchjob_query):
+def add_request(dbs, user_email, watchjob_query):
     """Adds a new request to the database.
 
     Args:
+        dbs (sqlalchemy.orm.session.Session): database session
         user_email (str): email address of the user
         watchjob_query (dict): the search query as json object
     """
     new_request = UserRequest(email=user_email, query=json.dumps(watchjob_query))
-    SESSION.add(new_request)
-    SESSION.commit()
+    dbs.add(new_request)
 
+    # persist so that the token gets generated #TODO: check if that is still needed
+    dbs.flush()
 
 def confirm_request(token):
     """Finds the request for the given token and turns it into a user.
@@ -116,46 +133,31 @@ def confirm_request(token):
     return user
 
 
-def relate_user_watchjob(user, watchjob):
-    """Relate an existing user to an existing watchjob.
-
-    Args:
-        user (User): the user object
-        watchjob (Watchjob): the watchjob object
-    """
-    user.watchjobs.append(watchjob)
-    SESSION.commit()
+    return new_request.confirm_token
 
 
-def get_all_watchjobs():
+def get_all_watchjobs(dbs):
     """Return all watchjob entries from database.
     Returns:
+        dbs (sqlalchemy.orm.dbs.Session): database session
         List[Watchjob]: list of all watchjobs
     """
-    return SESSION.query(Watchjob).all()
+    return dbs.query(Watchjob).all()
 
 
-def get_all_requests():
+def get_watchjob(dbs, watchjob_id):
+    """Return the specified watchjob from database.
+    Returns:
+        dbs (sqlalchemy.orm.session.Session): database session
+        watchjob (Watchjob): the watchjob
+    """
+    return dbs.query(Watchjob).filter(Watchjob.id == watchjob_id).first()
+
+
+def get_all_requests(dbs):
     """Return all user request entries from the database.
     Returns:
+        dbs (sqlalchemy.orm.session.Session): database session
         List[UserRequest]: list of all user requests
     """
-    return SESSION.query(UserRequest).all()
-
-
-def delete_user(user):
-    """Delete the given user from the database.
-    Args:
-        user (User): the user to delete
-    """
-    SESSION.delete(user)
-    SESSION.commit()
-
-
-def delete_watchjob(watchjob):
-    """Delete the given watchjob from the database.
-    Args:
-        watchjob (Watchjob): the watchjob to delete
-    """
-    SESSION.delete(watchjob)
-    SESSION.commit()
+    return dbs.query(UserRequest).all()

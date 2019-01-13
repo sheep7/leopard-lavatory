@@ -1,6 +1,12 @@
+celery
 flask
+flower
+Jinja2==2.*
 mechanicalsoup
 pytest
 pytest-cov
+pyyaml>=4.2b1
+redis
 sqlalchemy
 werkzeug
+flask-mail

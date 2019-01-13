@@ -1,0 +1,11 @@
+subject: subject
+header_text: header_text
+topleft: topleft
+topright_text: topright_text
+heading: heading
+summary_text: summary_text
+button_text: button_text
+button_href: button_href
+main_body_text: main_body_text
+second_body_text: second_body_text
+footer_text: footer_text
