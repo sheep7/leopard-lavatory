@@ -32,9 +32,14 @@
         <h2>Skapa bevakning</h2>
         <form class="confirm_form" method="post">
             <input type="hidden" name="action" value="confirm">
-            <label for="token">token:</label>
-            <input type="text" id="token" name="token"
-                   placeholder="token" required>
+            {% if token == '' %}
+                <label for="token">token:</label>
+                <input type="text" id="token" name="token"
+                                          placeholder="token" required>
+            {% else %}
+                <input type="hidden" id="token" name="token"
+                                          placeholder="token" value="{{ token }}" required>
+            {% endif %}
             <input type="submit" value="Bekräfta bevakning" title="bekräfta bevakning">
         </form>
     </div>

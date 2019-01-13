@@ -1,8 +1,9 @@
 """Main web blueprint."""
 
 import logging
+import urllib.parse
 
-from flask import Blueprint, flash, render_template, request, url_for
+from flask import Blueprint, flash, render_template, request, url_for, request
 from flask_mail import Mail, Message
 from werkzeug.utils import redirect
 
@@ -16,6 +17,7 @@ from sqlalchemy.orm.exc import NoResultFound
 LOG = logging.getLogger(__name__)
 
 bp = Blueprint('main', __name__)
+
 
 def handle_new_request(email, address):
     """Handle new watchjob requests submitted to the website.
@@ -44,7 +46,6 @@ def handle_new_request(email, address):
             LOG.error(str(error))
             flash('Någonting har gått fel, tyvärr.')
 
-        LOG.debug('All requests in database:\n  %s', '\n  '.join([str(r) for r in get_all_requests(dbs)]))
 
 def handle_confirm_request(token):
     """Handle confirm requests.
@@ -55,21 +56,23 @@ def handle_confirm_request(token):
     """
     LOG.info(f'Received confirm request with token {log_safe(token)}')
 
-    try:
-        # TODO make sure token is valid, ie not empty
+    with database_session() as dbs:
+        try:
+            # TODO make sure token is valid, ie not empty
 
-        user = confirm_request(token)
-        LOG.debug(f'Created user {user.email}')
+            user = confirm_request(dbs, token)
+            LOG.debug(f'Created user {user.email}')
 
-        flash('Bevakningsförfrågan aktiverades!', f'Framöver kommer du att få mejl på {user.email} när ärenden om din adress dyker upp.')
-    except NoResultFound as err:
-        LOG.error(str(err))
-        flash('Ogiltigt token')
-    except IntegrityError as err:
-        # most likely adding the user violated the unique constraint
-        LOG.error(str(err))
-        flash('Användare redan existerar')
-    # TODO more error handling
+            flash('Bevakningsförfrågan aktiverades!', f'Framöver kommer du att få mejl på {user.email} när ärenden om din adress dyker upp.')
+        except NoResultFound as err:
+            LOG.error(str(err))
+            flash('Ogiltigt token')
+        # TODO do not reveal that the user already exists
+        except IntegrityError as err:
+            # most likely adding the user violated the unique constraint
+            LOG.error(str(err))
+            flash('Användare redan existerar')
+        # TODO more error handling
 
 @bp.route('/', methods=('GET', 'POST'))
 def index():
@@ -98,4 +101,4 @@ def confirm():
         return redirect(url_for('main.index'))
 
     if request.method == 'GET':
-        return render_template('confirm.html')
+        return render_template('confirm.html', token=request.args.get('t', ''))

@@ -119,21 +119,20 @@ def add_request(dbs, user_email, watchjob_query):
     new_request = UserRequest(email=user_email, query=json.dumps(watchjob_query))
     dbs.add(new_request)
 
-    # persist so that the token gets generated #TODO: check if that is still needed
-    dbs.flush()
+    # so that the confirm_token field is populated
+    dbs.commit()
 
-def confirm_request(token):
+    return new_request.confirm_token
+
+def confirm_request(dbs, token):
     """Finds the request for the given token and turns it into a user.
 
     Args:
         token (str): token
     """
-    request = SESSION.query(UserRequest).filter(UserRequest.confirm_token == token).one()
-    user, watchjob = add_user_watchjob(request.email, json.loads(request.query))
+    request = dbs.query(UserRequest).filter(UserRequest.confirm_token == token).one()
+    user, watchjob = add_user_watchjob(dbs, request.email, json.loads(request.query))
     return user
-
-
-    return new_request.confirm_token
 
 
 def get_all_watchjobs(dbs):
