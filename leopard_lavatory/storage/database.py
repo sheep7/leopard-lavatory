@@ -137,7 +137,27 @@ def confirm_request(dbs, token):
     """
     request = dbs.query(UserRequest).filter(UserRequest.confirm_token == token).one()
     user, watchjob = add_user_watchjob(dbs, request.email, json.loads(request.query))
+
+    # so that the delete_token field is populated
+    dbs.commit()
+
     return user
+
+
+def delete_user(dbs, token):
+    """Finds the user associated with the given token and deletes them.
+
+    Args:
+        dbs (sqlalchemy.orm.dbs.Session): database session
+        token (str): token
+    """
+    # an exception is thrown if the user does not exist
+    user = dbs.query(User).filter(User.delete_token == token).one()
+
+    # TODO we leave wathjobs orphaned! On the other hand, we can't cascase delete, we want watchjobs to be shared between users
+    # otherwise we'll check multiple times for the same address
+
+    dbs.delete(user)
 
 
 def get_all_watchjobs(dbs):

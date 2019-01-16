@@ -117,3 +117,14 @@ def send_confirm_email(email_address, confirm_link):
     msg.html = html_body
 
     mail.send(msg)
+
+
+@celery.task
+def send_welcome_email(email_address, delete_link):
+    text_body, html_body = create_email_bodies('welcome', {'button_href': delete_link})
+    msg = Message("Välkommen!", recipients=[os.environ['FLASK_MAIL_RECIPIENT']])
+    msg.body = text_body
+    msg.html = html_body
+
+    mail.send(msg)
+
