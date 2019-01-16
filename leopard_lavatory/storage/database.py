@@ -50,7 +50,7 @@ class User(Base):
     """User table and object."""
     email = Column(String(255), unique=True)
     delete_token = Column(String(255), default=create_token)
-    watchjobs = relationship('Watchjob', secondary=user_watchjob, back_populates='users')
+    watchjobs = relationship('Watchjob', secondary=user_watchjob, back_populates='users', cascade='delete')
 
 
 class Watchjob(Base):
