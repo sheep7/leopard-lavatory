@@ -50,6 +50,7 @@ class User(Base):
     """User table and object."""
     email = Column(String(255), unique=True)
     delete_token = Column(String(255), default=create_token)
+    # TODO don't cascade if more users reference it
     watchjobs = relationship('Watchjob', secondary=user_watchjob, back_populates='users', cascade='delete')
 
 
@@ -154,7 +155,7 @@ def delete_user(dbs, token):
     # an exception is thrown if the user does not exist
     user = dbs.query(User).filter(User.delete_token == token).one()
 
-    # TODO we leave wathjobs orphaned! On the other hand, we can't cascase delete, we want watchjobs to be shared between users
+    # TODO we leave wathjobs orphaned! On the other hand, we can't cascade delete, we want watchjobs to be shared between users
     # otherwise we'll check multiple times for the same address
 
     dbs.delete(user)

@@ -27,6 +27,7 @@ def test_index_post(client):
     ), follow_redirects=True)
     assert b'fel' not in rv.data
     assert b'Aktivera' in rv.data
+    # TODO cleanup
 
 
 def test_index_post_invalid_input(client):
