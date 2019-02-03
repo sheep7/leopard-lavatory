@@ -50,7 +50,6 @@ class User(Base):
     """User table and object."""
     email = Column(String(255), unique=True)
     delete_token = Column(String(255), default=create_token)
-    # TODO don't cascade if more users reference it
     watchjobs = relationship('Watchjob', secondary=user_watchjob, back_populates='users')
 
 
