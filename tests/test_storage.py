@@ -6,11 +6,12 @@ from leopard_lavatory.storage.database import *
 
 class TestDatabase:
     email_a = 'a@example.com'
+    email_b = 'b@example.com'
 
     def test_add_user_watchjobs(self):
         with database_session() as dbs:
             user_a, wj_a = add_user_watchjob(dbs, TestDatabase.email_a, {'street': 'a-street'})
-            user_b, wj_b = add_user_watchjob(dbs, 'b@example.com', {'street': 'b-street'})
+            user_b, wj_b = add_user_watchjob(dbs, TestDatabase.email_b, {'street': 'b-street'})
             user_c, wj_c = add_user_watchjob(dbs, 'c@example.com', {'street': 'c-street'})
 
             assert len(user_b.watchjobs) == 1
@@ -60,11 +61,22 @@ class TestDatabase:
 
     def test_delete_user(self):
         with database_session() as dbs:
-            user_a, wj_a = add_user_watchjob(dbs, TestDatabase.email_a, {'street': 'a-street'})
+            query = {'street': 'a-street'}
+            user_a, wj_a = add_user_watchjob(dbs, TestDatabase.email_a, query)
+            # wj_b is the same as wj_a
+            user_b, wj_b = add_user_watchjob(dbs, TestDatabase.email_b, query)
 
             users = dbs.query(User).all()
 
-            assert len(users) == 1
+            print("%d users for wj_a" % len(wj_a.users))
+            print("%d users for wj_b" % len(wj_b.users))
+
+            print("users for wj_a: %s" % ", ".join([user.email for user in wj_a.users]))
+            print("users for wj_b: %s" % ", ".join([user.email for user in wj_b.users]))
+
+            assert len(users) == 2
+            assert len(wj_a.users) == 2
+            assert len(wj_b.users) == 2
 
             delete_token = user_a.delete_token
 
@@ -74,5 +86,10 @@ class TestDatabase:
 
             assert deleted_user == None
 
+            # make sure the watchjob was not deleted, as it is also associated with user_b
+            watchjob = dbs.query(Watchjob).filter(Watchjob.query == json.dumps(query)).one_or_none()
+
+            assert watchjob is not None
+
             # no other cleanup required
-            dbs.delete(wj_a)
+            dbs.delete(watchjob)

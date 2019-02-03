@@ -51,12 +51,12 @@ class User(Base):
     email = Column(String(255), unique=True)
     delete_token = Column(String(255), default=create_token)
     # TODO don't cascade if more users reference it
-    watchjobs = relationship('Watchjob', secondary=user_watchjob, back_populates='users', cascade='delete')
+    watchjobs = relationship('Watchjob', secondary=user_watchjob, back_populates='users')
 
 
 class Watchjob(Base):
     """Watchjob table and object"""
-    query = Column(String(255))
+    query = Column(String(255), unique=True)
     last_case_id = Column(Integer, default=0)
     users = relationship('User', secondary=user_watchjob, back_populates='watchjobs')
 
@@ -106,10 +106,17 @@ def add_user_watchjob(dbs, user_email, watchjob_query):
         user = User(email=user_email)
         dbs.add(user)
 
-    new_watchjob = Watchjob(query=json.dumps(watchjob_query))
-    user.watchjobs.append(new_watchjob)
-    dbs.add(new_watchjob)
-    return user, new_watchjob
+    stringified_query = json.dumps(watchjob_query)
+
+    watchjob = dbs.query(Watchjob).filter(Watchjob.query == stringified_query).one_or_none()
+    if watchjob is None:
+        watchjob = Watchjob(query=stringified_query)
+        dbs.add(watchjob)
+
+    # no matter whether user and/or watchjob were new, connect them to each other
+    user.watchjobs.append(watchjob)
+
+    return user, watchjob
 
 
 def add_request(dbs, user_email, watchjob_query):
@@ -155,8 +162,10 @@ def delete_user(dbs, token):
     # an exception is thrown if the user does not exist
     user = dbs.query(User).filter(User.delete_token == token).one()
 
-    # TODO we leave wathjobs orphaned! On the other hand, we can't cascade delete, we want watchjobs to be shared between users
-    # otherwise we'll check multiple times for the same address
+    for watchjob in user.watchjobs:
+        # if this user is the only one with this watchjob
+        if len(watchjob.users) == 1:
+            dbs.delete(watchjob)
 
     dbs.delete(user)
 
