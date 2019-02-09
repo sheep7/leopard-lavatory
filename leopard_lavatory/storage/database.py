@@ -55,7 +55,7 @@ class User(Base):
 
 class Watchjob(Base):
     """Watchjob table and object"""
-    query = Column(String(255))
+    query = Column(String(255), unique=True)
     last_case_id = Column(Integer, default=0)
     users = relationship('User', secondary=user_watchjob, back_populates='watchjobs')
 
@@ -105,10 +105,17 @@ def add_user_watchjob(dbs, user_email, watchjob_query):
         user = User(email=user_email)
         dbs.add(user)
 
-    new_watchjob = Watchjob(query=json.dumps(watchjob_query))
-    user.watchjobs.append(new_watchjob)
-    dbs.add(new_watchjob)
-    return user, new_watchjob
+    stringified_query = json.dumps(watchjob_query)
+
+    watchjob = dbs.query(Watchjob).filter(Watchjob.query == stringified_query).one_or_none()
+    if watchjob is None:
+        watchjob = Watchjob(query=stringified_query)
+        dbs.add(watchjob)
+
+    # no matter whether user and/or watchjob were new, connect them to each other
+    user.watchjobs.append(watchjob)
+
+    return user, watchjob
 
 
 def add_request(dbs, user_email, watchjob_query):
@@ -137,7 +144,29 @@ def confirm_request(dbs, token):
     """
     request = dbs.query(UserRequest).filter(UserRequest.confirm_token == token).one()
     user, watchjob = add_user_watchjob(dbs, request.email, json.loads(request.query))
+
+    # so that the delete_token field is populated
+    dbs.commit()
+
     return user
+
+
+def delete_user(dbs, token):
+    """Finds the user associated with the given token and deletes them.
+
+    Args:
+        dbs (sqlalchemy.orm.dbs.Session): database session
+        token (str): token
+    """
+    # an exception is thrown if the user does not exist
+    user = dbs.query(User).filter(User.delete_token == token).one()
+
+    for watchjob in user.watchjobs:
+        # if this user is the only one with this watchjob
+        if len(watchjob.users) == 1:
+            dbs.delete(watchjob)
+
+    dbs.delete(user)
 
 
 def get_all_watchjobs(dbs):

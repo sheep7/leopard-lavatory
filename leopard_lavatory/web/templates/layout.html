@@ -1,0 +1,37 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>{% block title %}{% endblock %} - Leopard Lavatory</title>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+</head>
+<body>
+
+{% for message in get_flashed_messages() %}
+<!-- Note -->
+<div class="note">
+    <h4>{{ message }}</h4>
+</div>
+{% endfor %}
+
+<!-- Header -->
+<div class="header">
+    <h1>{% block header %}{% endblock %}</h1>
+</div>
+
+<!-- Navigation Bar -->
+<div class="navbar">
+    <a href="#">Skapa bevakning</a>
+    <a href="#">Hjälp+Info</a>
+</div>
+
+{% block content %}{% endblock %}
+
+<!-- Footer -->
+<div class="footer">
+    <a href="#">Integritetspolicy</a>
+</div>
+
+</body>
+</html>
