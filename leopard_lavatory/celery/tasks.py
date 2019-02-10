@@ -37,8 +37,8 @@ mail.debug = True
 @celery.on_after_configure.connect
 def setup_periodic_task(sender, **kwargs):
     sender.add_periodic_task(
-        # run jobs once an hour, every day between 8 in the morning and 8 in the evening
-        crontab(hour=list(range(8 - 20)), minute=-0),
+        # by default, run jobs once an hour, every day between 8 in the morning and 8 in the evening
+        crontab(hour=os.environ.get('CELERY_CRONTAB_HOURS', '8-20'), minute='0'),
         run_all_watchjobs.s(),
         name="Run watchjobs")
 
