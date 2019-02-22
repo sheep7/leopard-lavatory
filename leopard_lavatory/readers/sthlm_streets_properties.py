@@ -4,7 +4,7 @@
 """
 Class SthlmStreetsFastigheter
 
-Crawling a list of all street addresses and fastighet names from kartor.stockholm.se
+Crawling a list of all street addresses and property names from kartor.stockholm.se
 """
 import json
 import logging
@@ -103,7 +103,7 @@ class SthlmStreetsProperties(BaseReader):
                 self.characters.append(character)
                 new_character = Character(character=character)
                 dbs.add(new_character)
-                LOG.info(f'Encountered new character in name: {character} in ({name})')
+                LOG.info(f'Encountered new character in name: {character} (in {name})')
 
     def expand_query(self, dbs, query):
         """Add new queries by appending a character to the given prefix for all known characters."""

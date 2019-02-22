@@ -211,7 +211,7 @@ def parse_entry(dbs, raw_entry):
         dbs.add(new_number)
 
         # update x/y_min/max
-        if x and y:
+        if all([x, y, existing_entry.x_min, existing_entry.x_max, existing_entry.y_min, existing_entry.y_max]):
             if x < existing_entry.x_min:
                 existing_entry.x_min = x
             if x > existing_entry.x_max:
