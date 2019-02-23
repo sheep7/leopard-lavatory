@@ -49,6 +49,7 @@ class Query(Base):
     DEAD_END = 0  # query returned 0 results
     LEAF = 1  # query returned a non-zero, complete list of results (less than the maximum)
     EXPANDED = 2  # query returned the maximum number of results so it was expanded into subqueries
+    EXPAND_ONLY = 3  # query should not be executed but expanded immediately (eg all it's results are already known)
 
     prefix = Column(String(255))
     full_entry = Column(Boolean, default=False) # True if prefix is a full entry result (without number but one trailing space)

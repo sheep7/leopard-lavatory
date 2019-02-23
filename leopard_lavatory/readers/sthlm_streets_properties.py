@@ -116,7 +116,14 @@ class SthlmStreetsProperties(BaseReader):
                     skip = True
             if skip:
                 continue
-            new_query = Query(prefix=query.prefix + character, status=Query.TBD, full_entry=query.full_entry)
+            status = Query.TBD
+            if character == ' ':
+                if query.prefix == '':
+                    # skip space as first character
+                    continue
+                # mark query as expand only because its result are all known already (space in the end doesn't matter)
+                status = Query.EXPAND_ONLY
+            new_query = Query(prefix=query.prefix + character, status=status, full_entry=query.full_entry)
             dbs.add(new_query)
         dbs.commit()
 
@@ -132,8 +139,16 @@ class SthlmStreetsProperties(BaseReader):
 
     def get_one(self, dbs, query):
         """Process one query."""
-        LOG.info(f'{query.prefix}  (processing query)')
         prefix = query.prefix
+        LOG.info(f'{prefix}  (processing query)')
+
+        if query.status == Query.EXPAND_ONLY:
+            LOG.info(f' EXP-O  Expanding expand-only query "{prefix}".')
+            query.status = Query.EXPANDED
+            self.expand_query(dbs, query)
+            dbs.commit()
+            return
+
         num_rows, streets, properties = self.get_suggestion_list(prefix, self.max_rows)
         query.num_results = num_rows
 
@@ -151,11 +166,9 @@ class SthlmStreetsProperties(BaseReader):
 
         if num_rows < self.max_rows:
             query.status = Query.LEAF
-            LOG.info(
-                f' LEAF  Marking query "{prefix}" as leaf. (As it returned less than max rows, so probably a complete list).')
+            LOG.info(f' LEAF  Marking query "{prefix}" as leaf. (returned less than max rows, so a complete list)')
         else:
-            LOG.info(
-                f' EXPA  Expanding query "{prefix}". (As it returned max rows, so probably an incomplete list).')
+            LOG.info(f' EXPA  Expanding query "{prefix}". (returned max rows, so probably an incomplete list)')
             query.status = Query.EXPANDED
             self.expand_query(dbs, query)
 
