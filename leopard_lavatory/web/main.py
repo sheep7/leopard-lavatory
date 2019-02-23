@@ -9,6 +9,7 @@ from sqlalchemy.orm.exc import NoResultFound
 from werkzeug.utils import redirect
 
 from leopard_lavatory.celery.tasks import send_confirm_email, send_welcome_email
+from leopard_lavatory.storage.autocomplete import autocomplete_db_session, get_suggestions
 from leopard_lavatory.storage.database import add_request, database_session, confirm_request, delete_user
 from leopard_lavatory.utils import valid_email, valid_address, log_safe
 
@@ -146,3 +147,21 @@ def delete():
 
     if request.method == 'GET':
         return render_template('delete.html', token=request.args.get('t', ''))
+
+
+@bp.route('/autocomplete')
+def autocomplete():
+    """Return autocomplete suggestions for a given prefix.
+    Returns:
+        str: a json str with autocomplete suggestions or an error message
+    """
+    prefix = request.args.get('prefix')
+    if prefix is None:
+        return 'prefix parameter is required', 400
+    if not valid_address(prefix, min_len=1):
+        return 'invalid prefix provided', 400
+    with autocomplete_db_session() as dbs:
+        suggestions = get_suggestions(dbs, prefix)
+        if suggestions is None:
+            return 'No suggestions for this prefix.', 404
+        return suggestions

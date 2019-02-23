@@ -1,9 +1,12 @@
 """Test sthlm_sbk reader."""
 import json
 
+import pytest
+
 from leopard_lavatory.readers.sthlm_sbk import SBKReader
 
 
+@pytest.mark.skip(reason='makes http request, skip for performance by default')
 def test_sthlm_sbk():
     reader = SBKReader()
 

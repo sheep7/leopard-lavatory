@@ -27,8 +27,8 @@ class TestUtils:
     def test_valid_address(self):
         assert valid_address('Drottninggatan 30')
         assert valid_address('Värmdövägen 1b')
-        assert valid_address('a' * 255), 'a 255 character string is valid'
-        assert not valid_address('a' * 256), 'a 256 character string is too long'
+        assert valid_address('a' * 256), 'a 255 character string is valid'
+        assert not valid_address('a' * 257), 'a 256 character string is too long'
         assert not valid_address('illegal character !')
         assert not valid_address('illegal character "')
         assert not valid_address("illegal character '")

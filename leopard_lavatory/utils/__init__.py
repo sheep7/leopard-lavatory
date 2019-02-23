@@ -40,21 +40,24 @@ def valid_email(email):
     return regex.match(email) is not None
 
 
-def valid_address(address):
-    """Check if a given string only contains characters valid for a street address
-    or property.
-    Note that we are allowing single quotes in the string.
+def valid_address(address, min_len=3):
+    """Check if a given string only contains characters valid for a street address or property, is at least `min_len`
+    characters long and not longer than 255
+    not too long
 
     Args:
         address (str): the address string to check
+        min_len (int): the required minimum length of the address string
     Returns:
-        bool: True if the address string only contains valid characters, False otherwise.
+        bool: True if the address string only contains valid characters and is of correct length, False otherwise.
     """
-    if len(address) > 255:
+    if not isinstance(address, str):
+        return False
+    if not min_len <= len(address) <= 256:
         return False
     # TODO: check if all street and property names in Stockholm pass this regexp (might need ' ?)
     regex = re.compile(
-        r'^[a-z0-9äöåéèáàüøæ:.&+ -]{3,255}$',
+        r'^[a-z0-9äöåéèáàüøæ:.&+ -]*$',
         re.IGNORECASE)
     return regex.match(address) is not None
 
