@@ -110,8 +110,8 @@ def notify_users(new_cases, watchjob_id):
 
 
 @celery.task
-def send_confirm_email(email_address, confirm_link):
-    text_body, html_body = create_email_bodies('activation', {'button_href': confirm_link})
+def send_confirm_email(email_address, confirm_link, address):
+    text_body, html_body = create_email_bodies('activation', {'button_href': confirm_link, 'address': address})
     msg = Message("Bekräfta bevakning av byggärende", recipients=[os.environ['FLASK_MAIL_RECIPIENT']])
     msg.body = text_body
     msg.html = html_body
