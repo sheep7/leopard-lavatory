@@ -63,6 +63,8 @@ class SthlmStreetsProperties(BaseReader):
                                  result rows as value
                 properties (dict) - dict with property names (including numbers) as keys and raw
                                     result rows as value
+        Throws:
+            ConnectionError: when the connection to the API failed
         """
         url = self.url + self.suggestions_path.format(prefix=prefix, maxrows=max_rows)
         LOG.debug(f'Requesting suggestions for prefix "{prefix}" (max {max_rows} rows).')
@@ -149,30 +151,33 @@ class SthlmStreetsProperties(BaseReader):
             dbs.commit()
             return
 
-        num_rows, streets, properties = self.get_suggestion_list(prefix, self.max_rows)
-        query.num_results = num_rows
+        try:
+            num_rows, streets, properties = self.get_suggestion_list(prefix, self.max_rows)
+            query.num_results = num_rows
 
-        if num_rows == 0:
-            query.status = Query.DEAD_END
-            LOG.info(f' DEAD  Got 0 results, marking prefix "{prefix}" as dead end.')
-            return
+            if num_rows == 0:
+                query.status = Query.DEAD_END
+                LOG.info(f' DEAD  Got 0 results, marking prefix "{prefix}" as dead end.')
+                return
 
-        LOG.info(f'{num_rows}  rows received ({len(streets)} streets and {len(properties)} properties).')
+            LOG.info(f'{num_rows}  rows received ({len(streets)} streets and {len(properties)} properties).')
 
-        for name, values in streets.items():
-            self.process_result_entry(dbs, name, values, prefix)
-        for name, values in properties.items():
-            self.process_result_entry(dbs, name, values, prefix)
+            for name, values in streets.items():
+                self.process_result_entry(dbs, name, values, prefix)
+            for name, values in properties.items():
+                self.process_result_entry(dbs, name, values, prefix)
 
-        if num_rows < self.max_rows:
-            query.status = Query.LEAF
-            LOG.info(f' LEAF  Marking query "{prefix}" as leaf. (returned less than max rows, so a complete list)')
-        else:
-            LOG.info(f' EXPA  Expanding query "{prefix}". (returned max rows, so probably an incomplete list)')
-            query.status = Query.EXPANDED
-            self.expand_query(dbs, query)
+            if num_rows < self.max_rows:
+                query.status = Query.LEAF
+                LOG.info(f' LEAF  Marking query "{prefix}" as leaf. (returned less than max rows, so a complete list)')
+            else:
+                LOG.info(f' EXPA  Expanding query "{prefix}". (returned max rows, so probably an incomplete list)')
+                query.status = Query.EXPANDED
+                self.expand_query(dbs, query)
 
-        dbs.commit()
+            dbs.commit()
+        except ConnectionError as e:
+            LOG.warning(f' ERR  Query could not be completed, leaving it in status TBD (ConnectionError: {e})')
 
     def log_stats(self, dbs):
         num_raw_entries = dbs.query(RawEntry.id).filter(RawEntry.first == 1).count()
