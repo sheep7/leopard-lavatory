@@ -13,7 +13,9 @@ from sqlalchemy import func
 
 from leopard_lavatory.readers.base_reader import BaseReader
 from leopard_lavatory.storage.db_sthlm_addresses import database_session, add_raw_entry, Query, Character, RawEntry, \
-    parse_entry, Entry
+    parse_entry, Entry, RawSuggestion
+from storage.autocomplete import autocomplete_db_session, NUM_SUGGESTIONS, Suggestion
+from utils import all_substrings
 
 LOG = logging.getLogger(__name__)
 
@@ -213,10 +215,86 @@ class SthlmStreetsProperties(BaseReader):
                 except (KeyboardInterrupt, SystemExit):
                     break
 
+    def recreate_autocomplete(self):
+        """Re-create the autocomplete database from the street database."""
+        LOG.info('Preparing raw suggestions...')
+        with database_session() as dbs:
+            dbs.query(RawSuggestion).delete()
+            streets = dbs.query(Entry). \
+                filter(Entry.address_type == Entry.STREET). \
+                all()
+            already_done = set()
+            i = 0
+            n = len(streets)
+            last_p = 0
+            for street in streets:
+                i += 1
+                p = round(100.0 * i / n)
+                if p > last_p:
+                    LOG.info(f'{p}% of streets done')
+                    last_p = p
+                for substr in all_substrings(street.name):
+                    if substr in already_done:
+                        continue
+                    prefix_suggestions = dbs.query(Entry). \
+                        filter(Entry.address_type == Entry.STREET). \
+                        filter(Entry.name.like(f'{substr}%')). \
+                        order_by(Entry.name.asc()). \
+                        limit(NUM_SUGGESTIONS). \
+                        all()
+                    suggestions = prefix_suggestions
+                    if len(suggestions) < NUM_SUGGESTIONS:
+                        substr_suggestions = dbs.query(Entry). \
+                            filter(Entry.address_type == Entry.STREET). \
+                            filter(Entry.name.like(f'%{substr}%')). \
+                            filter(Entry.name.notlike(f'{substr}%')). \
+                            order_by(Entry.name.asc()). \
+                            limit(NUM_SUGGESTIONS - len(suggestions)). \
+                            all()
+                        suggestions += substr_suggestions
+                    assert len(suggestions) <= NUM_SUGGESTIONS
+                    if suggestions:
+                        new_suggestion = RawSuggestion(input=substr, entries=suggestions)
+                        dbs.add(new_suggestion)
+                    already_done.add(substr)
+
+            dbs.commit()
+
+            LOG.info('Done preparing raw suggestions. Starting rendering them into the autocomplete database.')
+            with autocomplete_db_session() as acdbs:
+                acdbs.query(Suggestion).delete()
+                raw_suggestions = dbs.query(RawSuggestion).all()
+                i = 0
+                n = len(raw_suggestions)
+                last_p = 0
+                for raw_suggestion in raw_suggestions:
+                    i += 1
+                    p = round(100.0 * i / n)
+                    if p > last_p:
+                        LOG.info(f'{p}% rendered')
+                        last_p = p
+                    rendered_suggestions = dict()
+                    for entry in raw_suggestion.entries:
+                        rendered_suggestions[entry.name] = {'x_min': entry.x_min,
+                                                            'x_max': entry.x_max,
+                                                            'y_min': entry.y_min,
+                                                            'y_max': entry.y_max}
+                    new_suggestion = Suggestion(input=raw_suggestion.input,
+                                                suggestions_json_str=json.dumps(rendered_suggestions))
+                    acdbs.add(new_suggestion)
+
+    def update_autocomplete(self):
+        """Update the autocomplete database for a given set of street results."""
+        # TODO: implement update autocomplete
+        raise NotImplementedError
+
 
 if __name__ == '__main__':
     logging.getLogger().setLevel(logging.INFO)
     r = SthlmStreetsProperties()
     r.set_avg_delay_seconds(0)
     r.get_first_page()
-    r.search()
+    if False:
+        r.search()
+    else:
+        r.recreate_autocomplete()

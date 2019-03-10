@@ -6,7 +6,7 @@ import re
 from contextlib import contextmanager
 from datetime import datetime
 
-from sqlalchemy import DateTime, Integer, String, Float, ForeignKey, Boolean
+from sqlalchemy import DateTime, Integer, String, Float, ForeignKey, Boolean, Table
 from sqlalchemy import create_engine, Column
 from sqlalchemy.ext.declarative import declarative_base, declared_attr
 from sqlalchemy.orm import sessionmaker, relationship
@@ -52,7 +52,8 @@ class Query(Base):
     EXPAND_ONLY = 3  # query should not be executed but expanded immediately (eg all it's results are already known)
 
     prefix = Column(String(255))
-    full_entry = Column(Boolean, default=False) # True if prefix is a full entry result (without number but one trailing space)
+    full_entry = Column(Boolean,
+                        default=False)  # True if prefix is a full entry result (without number but one trailing space)
     num_results = Column(Integer, default=-1)
     status = Column(Integer, default=TBD)
 
@@ -72,8 +73,13 @@ class RawEntry(Base):
     x = Column(String(255))
     y = Column(String(255))
 
-    query = Column(String(255))  # query uses to get the entry
+    query = Column(String(255))  # query used to get the entry
     first = Column(Integer)  # 1 if it's the first entry with that name, 0 if it's a duplicate
+
+
+entry_suggestions = Table('entry_suggestions', Base.metadata,
+                          Column('entry', Integer, ForeignKey('entry.id')),
+                          Column('rawsuggestion', Integer, ForeignKey('rawsuggestion.id')))
 
 
 class Entry(Base):
@@ -93,6 +99,10 @@ class Entry(Base):
 
     numbers = relationship('EntryNumber', back_populates='entry')
 
+    suggestions = relationship('RawSuggestion',
+                               secondary=entry_suggestions,
+                               back_populates='entries')
+
 
 class EntryNumber(Base):
     """House/Property number (for a street address with x/y coordinates)"""
@@ -102,6 +112,15 @@ class EntryNumber(Base):
 
     entry_id = Column(Integer, ForeignKey('entry.id'))
     entry = relationship('Entry', back_populates='numbers')
+
+
+class RawSuggestion(Base):
+    """Autocomplete suggestions as mappings from input string to address entries."""
+    input = Column(String(255), unique=True)
+
+    entries = relationship('Entry',
+                           secondary=entry_suggestions,
+                           back_populates='suggestions')
 
 
 # create db engine
@@ -201,7 +220,7 @@ def parse_entry(dbs, raw_entry):
         for existing_entry_number in existing_entry.numbers:
             if existing_entry_number.name == entry_number:
                 LOG.debug(f'Entry {entry_name} already had an existing_entry_number entry for {entry_number}: '
-                            f'{existing_entry_number}')
+                          f'{existing_entry_number}')
                 if existing_entry_number.x != x or existing_entry_number.y != y:
                     LOG.warning(f'Got same number entry with different x/y coordinates.\n'
                                 f'  Old {existing_entry_number}\nNew {raw_entry}')

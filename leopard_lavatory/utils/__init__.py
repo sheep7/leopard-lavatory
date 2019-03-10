@@ -81,3 +81,31 @@ def log_safe(string, max_len=300):
     safe_string = quote(string, safe='@')
 
     return safe_string
+
+
+def all_prefixes(full_string):
+    """Yield all prefixes of a given string.
+
+    So all_prefixes('abc') will yield 'a', 'ab', and 'abc'.
+    Args:
+        full_string (str): the complete string
+    Yields:
+        str: all prefixes of full_string, including full_string
+    """
+    for i in range(len(full_string)):
+        yield full_string[:i+1]
+
+
+def all_substrings(full_string):
+    """Yield all substrings of a given string.
+
+    So all_prefixes('abc') will yield 'a', 'b', 'c', 'ab', 'bc', and 'abc'.
+    Args:
+        full_string (str): the complete string
+    Yields:
+        str: all substrings of full_string, including full_string
+    """
+    for i in range(len(full_string)):
+        for j in range(i, len(full_string)):
+            yield full_string[i:j+1]
+

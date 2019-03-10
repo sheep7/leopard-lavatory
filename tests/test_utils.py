@@ -1,6 +1,6 @@
 """Testing the utils package."""
 
-from leopard_lavatory.utils import create_token, valid_email, valid_address, log_safe
+from leopard_lavatory.utils import create_token, valid_email, valid_address, log_safe, all_prefixes, all_substrings
 
 
 class TestUtils:
@@ -38,3 +38,15 @@ class TestUtils:
         assert log_safe('a' * 400).endswith('...'), 'cut inputs must end in ...'
         assert "'" not in log_safe("'"), 'unsafe characters like single quotes must be removed'
         assert log_safe('test@te.st') == 'test@te.st', 'simple email addresses must be preserved'
+
+    def test_all_prefixes(self):
+        assert set(all_prefixes('')) == set()
+        assert set(all_prefixes('x')) == {'x'}
+        assert set(all_prefixes('xy')) == {'x', 'xy'}
+        assert set(all_prefixes('xyz')) == {'x', 'xy', 'xyz'}
+
+    def test_all_substrings(self):
+        assert set(all_substrings('')) == set()
+        assert set(all_substrings('x')) == {'x'}
+        assert set(all_substrings('xy')) == {'x', 'y', 'xy'}
+        assert set(all_substrings('xyz')) == {'x', 'y', 'z', 'xy', 'yz', 'xyz'}

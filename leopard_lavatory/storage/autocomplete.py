@@ -9,6 +9,7 @@ from sqlalchemy import create_engine, Column
 from sqlalchemy.ext.declarative import declarative_base, declared_attr
 from sqlalchemy.orm import sessionmaker
 
+NUM_SUGGESTIONS = 10
 DB_URI = 'sqlite:///leopardlavatory_autocomplete.sqlite'
 LOG_ALL_SQL_STATEMENTS = False
 
@@ -40,7 +41,7 @@ Base = declarative_base(cls=Base)
 
 class Suggestion(Base):
     """Suggestion table and object."""
-    prefix = Column(String(255), unique=True)
+    input = Column(String(255), unique=True)
     suggestions_json_str = Column(String)
 
 
