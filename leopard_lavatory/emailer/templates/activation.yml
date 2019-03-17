@@ -1,6 +1,7 @@
 subject: Aktivera bevakning
 heading: Aktivera bevakning
 summary_text: "Någon, förhoppningsvis du, har skapat en bevakning för bygglov ärenden på följande address:"
+address: "Stadsvägen 1"
 button_text: Aktivera bevakning
 button_href: http://example.com/
 main_body_text: För att aktivera bevakningen, klicka här

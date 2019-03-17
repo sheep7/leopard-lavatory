@@ -1,6 +1,6 @@
 {{ heading }}
 -----------------------------------
-{{ summary_text }}
+{% block summary %}{{ summary_text }}{% endblock %}
 
 {{ main_body_text }}
 
