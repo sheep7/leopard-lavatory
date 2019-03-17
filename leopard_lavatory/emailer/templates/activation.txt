@@ -1,4 +1,4 @@
-{% extends "base.txt" %}
+{% extends "cta.txt" %}
 
 {% block summary %}
 {{ summary_text }}

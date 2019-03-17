@@ -1,0 +1,24 @@
+<!-- this is extracted from base.mjml, it's not a self-contained mjml file. It's not the best. -->
+    <mj-section padding="0 20px 20px 20px" background-color="#FFFFFF">
+      <mj-column width="80%">
+        <mj-text align="center" padding-top="10px" font-weight="500" padding="0px">
+          {% block summary %}{{ summary_text }}{% endblock %}</mj-text>
+      </mj-column>
+    </mj-section>
+    <mj-section>
+      <mj-column width="100%">
+        <mj-text align="center" padding="30px 40px 0 40px" font-weight="300">{{ main_body_text }}</mj-text>
+      </mj-column>
+    </mj-section>
+    <mj-section>
+      <mj-column width="100%">
+        <mj-button align="center" background-color="#5FA91D" color="#FFFFFF" border-radius="2px"
+          href="{{ button_href }}" inner-padding="15px 30px" padding-bottom="40px" padding-top="20px">{{ button_text }}
+        </mj-button>
+      </mj-column>
+    </mj-section>
+    <mj-section padding="15px 0" background-color="#FFFFFF">
+      <mj-column>
+        <mj-text align="center" font-weight="500" padding="10px">{{ second_body_text }}</mj-text>
+      </mj-column>
+    </mj-section>

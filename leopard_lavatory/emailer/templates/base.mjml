@@ -24,7 +24,7 @@
     </mj-section>
     <mj-section padding="20px 20px 0 20px" background-color="#FFFFFF">
       <mj-column>
-        <mj-text align="center" font-weight="300" padding="30px 40px 10px 40px" font-size="32px" line-height="40x" color="#5FA91D">{{ heading }}</mj-text>
+        <mj-text align="center" font-weight="300" padding="30px 40px 10px 40px" font-size="32px" line-height="40px" color="#5FA91D">{{ heading }}</mj-text>
       </mj-column>
     </mj-section>
     <mj-section padding="10px 20px" background-color="#FFFFFF">
@@ -38,23 +38,8 @@
           {% block summary %}{{ summary_text }}{% endblock %}</mj-text>
       </mj-column>
     </mj-section>
-    <mj-section>
-      <mj-column width="100%">
-        <mj-text align="center" padding="30px 40px 0 40px" font-weight="300">{{ main_body_text }}</mj-text>
-      </mj-column>
-    </mj-section>
-    <mj-section>
-      <mj-column width="100%">
-        <mj-button align="center" background-color="#5FA91D" color="#FFFFFF" border-radius="2px"
-          href="{{ button_href }}" inner-padding="15px 30px" padding-bottom="40px" padding-top="20">{{ button_text }}
-        </mj-button>
-      </mj-column>
-    </mj-section>
-    <mj-section padding="15px 0" background-color="#FFFFFF">
-      <mj-column>
-        <mj-text align="center" font-weight="500" padding="10px">{{ second_body_text }}</mj-text>
-      </mj-column>
-    </mj-section>
+    <!-- cta.mjml cut from here -->
+    <mj-raw>{% block main_content %}{% endblock %}</mj-raw>
     <mj-section padding="10px 0 20px 0">
       <mj-column>
         <mj-text align="center" color="#9B9B9B" font-size="11px">{% block footer %}{{ footer_text }}{% endblock %}

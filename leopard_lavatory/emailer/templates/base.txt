@@ -2,12 +2,7 @@
 -----------------------------------
 {% block summary %}{{ summary_text }}{% endblock %}
 
-{{ main_body_text }}
-
-{{ button_text }}: {{ button_href }}
-
-{{ second_body_text }}
-
+{% block main_content %}{% endblock %}
 
 --
 {{ footer_text }}

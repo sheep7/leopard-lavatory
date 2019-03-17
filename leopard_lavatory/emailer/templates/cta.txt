@@ -1,0 +1,9 @@
+{% extends "base.txt" %}
+
+{% block main_content %}
+{{ main_body_text }}
+
+{{ button_text }}: {{ button_href }}
+
+{{ second_body_text }}
+{% endblock %}
