@@ -69,3 +69,23 @@ Optionally, to see our tasks on a web interface, run flower (the example uses re
 ```
 $ flower --broker=redis://localhost:6379
 ```
+
+## Email templates
+
+### Previewing
+
+To preview available emails, run the `email_preview.py` server:
+
+```
+FLASK_APP=leopard_lavatory/emailer/email_preview FLASK_ENV=development flask run
+```
+
+Then, open http://localhost:5000 as usual. Using it should be self-explanatory.
+
+### Adding
+
+To add a new email template, three files are needed: one for the HTML body of the new email, one for the text body, and a YAML file with defaults for the variables in the template.
+
+Name all of the files the same, with the appropriate extension (eg. newfile.html, newfile.txt, newfile.yml). The YAML file should at least have the subject, everything else is optional (but might be nice to have to inspect your template properly in the email preview app).
+
+Extend the base template if you want to add your own content. If the email is a call to action (ie, it will have a short text and a button for the user to perform an action), consider extending the cta (call to action) template instead.
