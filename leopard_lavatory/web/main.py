@@ -38,7 +38,7 @@ def handle_new_request(email, address):
 
             confirm_link = urllib.parse.urljoin(request.url_root, url_for('main.confirm', t=request_token))
 
-            send_confirm_email.apply_async(args=[email, confirm_link])
+            send_confirm_email.apply_async(args=[email, confirm_link, address])
 
             flash(f'Tagit emot bevakningsförfrågan. '
                   f'Aktivera den med länken som skickades till {email}.')
