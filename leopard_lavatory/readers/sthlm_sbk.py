@@ -22,6 +22,9 @@ class SBKReader(BaseReader):
     search_button_name = 'SearchPropertyAndCase$SearchButton'
     search_button_value = 'Sök'
 
+    def __init__(self, ignore_bostadsanpassning=True):
+        self.ignore_bostadsanpassning = ignore_bostadsanpassning
+
     def parse_page(self, page):
         """Parse the page for a result table and return the table content in json friendly format.
         Args:
@@ -44,7 +47,10 @@ class SBKReader(BaseReader):
                         'type': cells[2].string.strip(),
                         'description': cells[3].string.strip(),
                         'date': cells[4].string.strip()}
-                cases.append(case)
+                if self.ignore_bostadsanpassning and case['type'] == "61 Bostadsanpassningsbidrag":
+                    self.log.debug('Case is bostadsannpassningsbidrag, ignoring (because ignore_bostadsanpassning is True')
+                else:
+                    cases.append(case)
 
         return cases
 
