@@ -47,7 +47,10 @@
                                 <tbody>
                                   <tr>
                                     <td style="background:#fafafa;font-size:14px;font-family:Open Sans, Helvetica, Arial, sans-serif;color:#505050;padding:15px;">
-                                      <h4>Typ: {{ case['type'] }}</h4> <span style="line-height:20px">{{ case['description'] }}</span> </td>
+                                      <h4>Typ: {{ case['type'] }}</h4>
+                                      <div style="line-height:20px">{{ case['description'] }}</div>
+                                      <div style="line-height:20px"><a href="http://insynsbk.stockholm.se/Byggochplantjansten/Arenden/Aktuellt-arende/?JournalNumber={{ case['id'] }}&DataSource=1&SortBy=&SortDirection=1">Klicka här för mer information</a></div>
+                                    </td>
                                   </tr>
                                 </tbody>
                               </table>
